@@ -4,8 +4,8 @@ import "./globals.scss";
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: "IBM Carbon Next.JS Template",
-  description: "A useful template for working with Next.JS along with IBM Carbon components",
+  title: "Carbon Type",
+  description: "A Word 2010-style document editor built with IBM Carbon components",
 };
 
 export default function RootLayout({
@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body style={{ margin: 0, padding: 0, overflow: 'hidden' }}>
         <Providers>{children}</Providers>
       </body>
     </html>
