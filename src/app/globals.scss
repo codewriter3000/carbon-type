@@ -3,3 +3,339 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+// ─── Word Processor Layout ───────────────────────────────────────────────────
+
+* {
+  box-sizing: border-box;
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.word-processor {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+// ─── Title Bar ───────────────────────────────────────────────────────────────
+
+.word-title-bar {
+  display: flex;
+  align-items: center;
+  background: #2b5797;
+  color: #fff;
+  height: 34px;
+  padding: 0 4px;
+  flex-shrink: 0;
+  gap: 4px;
+
+  .cds--btn--ghost {
+    color: rgba(255, 255, 255, 0.85);
+    min-height: 28px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    svg {
+      fill: rgba(255, 255, 255, 0.85);
+    }
+  }
+}
+
+.word-title-bar__quick-access {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.word-title-bar__document-title {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 400;
+  color: #fff;
+  pointer-events: none;
+  user-select: none;
+}
+
+.word-title-bar__right {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+// ─── Ribbon ──────────────────────────────────────────────────────────────────
+
+.word-ribbon {
+  flex-shrink: 0;
+  background: #f5f5f5;
+  border-bottom: 1px solid #b8b8b8;
+
+  // Tab list — make it look like Word ribbon tabs
+  .cds--tabs__nav {
+    background: #d8d8d8;
+    border-bottom: 1px solid #b8b8b8;
+  }
+
+  .cds--tabs__nav-link {
+    font-size: 11px;
+    padding: 4px 12px;
+    min-height: 26px;
+    color: #222;
+    background: transparent;
+  }
+
+  .cds--tabs__nav-item--selected .cds--tabs__nav-link {
+    color: #222;
+    background: #f5f5f5;
+    border-bottom: 2px solid #f5f5f5;
+  }
+
+  .cds--tabs__nav-item:hover .cds--tabs__nav-link {
+    background: #c8c8c8;
+  }
+
+  // Tab content area — flush, no extra padding
+  .cds--tab-content {
+    padding: 0;
+    background: #f5f5f5;
+  }
+}
+
+// ─── Ribbon Panel (one tab's content row) ────────────────────────────────────
+
+.ribbon-panel {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-height: 72px;
+  padding: 4px 4px 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+// ─── Ribbon Chunk ─────────────────────────────────────────────────────────────
+
+.ribbon-chunk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 6px 3px;
+  position: relative;
+  min-width: 40px;
+}
+
+.ribbon-chunk__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  width: 100%;
+}
+
+.ribbon-chunk__label {
+  font-size: 10px;
+  color: #555;
+  text-align: center;
+  white-space: nowrap;
+  margin-top: 3px;
+  padding-top: 2px;
+  border-top: 1px solid #c8c8c8;
+  width: 100%;
+  user-select: none;
+}
+
+.ribbon-divider {
+  width: 1px;
+  background: #c0c0c0;
+  align-self: stretch;
+  margin: 4px 4px 6px;
+  flex-shrink: 0;
+}
+
+// ─── Ribbon Row (small button row inside a chunk) ────────────────────────────
+
+.ribbon-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1px;
+  flex-wrap: nowrap;
+}
+
+// ─── Clipboard chunk — large Paste + small Cut/Copy column ───────────────────
+
+.ribbon-clipboard {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.ribbon-clipboard__paste {
+  // Large paste button
+  .cds--btn {
+    flex-direction: column;
+    height: 52px;
+    width: 44px;
+    padding: 2px 4px;
+    font-size: 11px;
+    gap: 2px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.ribbon-clipboard__small {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-top: 2px;
+}
+
+// ─── Font selects ─────────────────────────────────────────────────────────────
+
+.ribbon-select {
+  height: 22px;
+  border: 1px solid #ababab;
+  border-radius: 2px;
+  background: #fff;
+  font-size: 12px;
+  padding: 0 4px;
+  cursor: pointer;
+  min-width: 130px;
+  color: #161616;
+
+  &:focus {
+    outline: 2px solid #0f62fe;
+    outline-offset: -2px;
+  }
+
+  &--size {
+    min-width: 44px;
+    width: 44px;
+  }
+}
+
+// ─── Styles chunk ─────────────────────────────────────────────────────────────
+
+.ribbon-styles {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 2px;
+
+  .ribbon-style-btn.cds--btn {
+    min-height: unset;
+    padding: 3px 8px;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+}
+
+// ─── Ghost button sizing tweaks ───────────────────────────────────────────────
+
+.word-ribbon .cds--btn--ghost {
+  min-height: 22px;
+  padding: 2px 4px;
+  color: #222;
+
+  &:hover {
+    background: #dde0e5;
+    color: #222;
+  }
+
+  svg {
+    fill: #222;
+  }
+}
+
+.word-ribbon .cds--btn--primary {
+  min-height: 22px;
+  padding: 2px 4px;
+}
+
+// ─── Document Canvas ──────────────────────────────────────────────────────────
+
+.document-canvas {
+  flex: 1;
+  overflow-y: auto;
+  background: #808080;
+  display: flex;
+  justify-content: center;
+  padding: 24px 24px;
+}
+
+// ─── Document Page (white paper) ─────────────────────────────────────────────
+
+.document-page {
+  background: #fff;
+  width: 816px;
+  min-height: 1056px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
+  padding: 96px;
+  flex-shrink: 0;
+}
+
+// ─── Document content (contentEditable) ──────────────────────────────────────
+
+.document-content {
+  min-height: 864px;
+  outline: none;
+  line-height: 1.5;
+  word-wrap: break-word;
+  color: #000;
+
+  p {
+    margin: 0 0 12px;
+  }
+
+  h1 {
+    font-size: 26pt;
+    font-weight: 700;
+    margin: 0 0 14px;
+  }
+
+  h2 {
+    font-size: 18pt;
+    font-weight: 700;
+    margin: 0 0 12px;
+  }
+
+  h3 {
+    font-size: 14pt;
+    font-weight: 700;
+    margin: 0 0 10px;
+  }
+}
+
+// ─── Status Bar ───────────────────────────────────────────────────────────────
+
+.word-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #2b5797;
+  color: rgba(255, 255, 255, 0.9);
+  height: 22px;
+  padding: 0 12px;
+  font-size: 11px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.word-status-bar__divider {
+  opacity: 0.4;
+}

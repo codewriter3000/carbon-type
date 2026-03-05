@@ -1,18 +1,7 @@
 'use client';
 
-import { Content, Theme } from '@carbon/react';
+import { Theme } from '@carbon/react';
 
-import ApplicationHeader from '@/components/ApplicationHeader/ApplicationHeader';
-
-export function Providers({ children }) {
-	return (
-		<div>
-			<Theme theme="g100">
-				<ApplicationHeader />
-				<Content className="h-screen">
-					{children}
-				</Content>
-			</Theme>
-		</div>
-	);
+export function Providers({ children }: { children: React.ReactNode }) {
+  return <Theme theme="white">{children}</Theme>;
 }
