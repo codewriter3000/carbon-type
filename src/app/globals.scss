@@ -70,7 +70,37 @@ html {
 .word-title-bar__right {
   display: flex;
   align-items: center;
-  gap: 1px;
+  gap: 4px;
+}
+
+.word-title-bar__autosave-status {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0 6px;
+  white-space: nowrap;
+}
+
+.word-title-bar__autosave-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+
+  .word-title-bar__autosave-toggle-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  // Override Carbon toggle colours for the dark title bar
+  .cds--toggle__switch {
+    margin: 0;
+  }
+
+  .cds--toggle__label {
+    margin: 0;
+  }
 }
 
 // ─── Ribbon ──────────────────────────────────────────────────────────────────
@@ -145,13 +175,22 @@ html {
 .ribbon-chunk__label {
   font-size: 10px;
   color: #555;
-  text-align: center;
   white-space: nowrap;
   margin-top: 3px;
   padding-top: 2px;
   border-top: 1px solid #c8c8c8;
   width: 100%;
   user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.ribbon-chunk__launcher {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .ribbon-divider {
@@ -267,7 +306,135 @@ html {
   padding: 2px 4px;
 }
 
-// ─── Document Canvas ──────────────────────────────────────────────────────────
+// ─── Line Spacing Dropdown ────────────────────────────────────────────────────
+
+.line-spacing-dropdown {
+  position: relative;
+  display: inline-flex;
+}
+
+.line-spacing-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 22px;
+  padding: 2px 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #222;
+  border-radius: 0;
+
+  &:hover {
+    background: #dde0e5;
+  }
+
+  svg {
+    fill: #222;
+  }
+}
+
+.line-spacing-menu {
+  position: fixed;
+  background: #fff;
+  border: 1px solid #c6c6c6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  min-width: 64px;
+  padding: 4px 0;
+  list-style: none;
+  margin: 0;
+}
+
+.line-spacing-menu-item {
+  display: block;
+  width: 100%;
+  padding: 5px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  color: #161616;
+
+  &:hover {
+    background: #e8e8e8;
+  }
+
+  &--active {
+    background: #0f62fe;
+    color: #fff;
+
+    &:hover {
+      background: #0353e9;
+    }
+  }
+}
+
+// ─── Citation Style Dropdown ──────────────────────────────────────────────────
+
+.citation-style-launcher {
+  display: inline-flex;
+  align-items: center;
+}
+
+.citation-style-launcher-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  border-radius: 2px;
+
+  &:hover {
+    background: #c8c8c8;
+    color: #161616;
+  }
+}
+
+.citation-style-menu {
+  position: fixed;
+  background: #fff;
+  border: 1px solid #c6c6c6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  min-width: 120px;
+  padding: 4px 0;
+  list-style: none;
+  margin: 0;
+}
+
+.citation-style-menu-item {
+  display: block;
+  width: 100%;
+  padding: 6px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  color: #161616;
+
+  &:hover {
+    background: #e8e8e8;
+  }
+
+  &--active {
+    background: #0f62fe;
+    color: #fff;
+
+    &:hover {
+      background: #0353e9;
+    }
+  }
+}
+
+// ─── Document Canvas ───────────────────────────────────────────────────────────
 
 .document-canvas {
   flex: 1;
@@ -296,6 +463,8 @@ html {
   outline: none;
   line-height: 1.5;
   word-wrap: break-word;
+  font-family: Calibri, sans-serif;
+  font-size: 12pt;
   color: #000;
 
   p {
@@ -319,6 +488,29 @@ html {
     font-weight: 700;
     margin: 0 0 10px;
   }
+
+  ul, ol {
+    margin: 0 0 12px;
+    padding-left: 2em;
+  }
+
+  ul {
+    list-style-type: disc;
+
+    ul { list-style-type: circle; }
+    ul ul { list-style-type: square; }
+  }
+
+  ol {
+    list-style-type: decimal;
+
+    ol { list-style-type: lower-alpha; }
+    ol ol { list-style-type: lower-roman; }
+  }
+
+  li {
+    margin: 0 0 4px;
+  }
 }
 
 // ─── Status Bar ───────────────────────────────────────────────────────────────
@@ -338,4 +530,9 @@ html {
 
 .word-status-bar__divider {
   opacity: 0.4;
+}
+
+.word-status-bar__autosave {
+  opacity: 0.85;
+  font-style: italic;
 }

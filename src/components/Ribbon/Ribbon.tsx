@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { Tabs, Tab, TabList, TabPanels, TabPanel, Button } from '@carbon/react';
 import {
   TextBold,
@@ -33,6 +34,7 @@ import {
   ZoomIn,
   ZoomOut,
   Printer,
+  ChevronDown,
 } from '@carbon/icons-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -46,9 +48,18 @@ interface RibbonProps {
   isBold: boolean;
   isItalic: boolean;
   isUnderline: boolean;
+  isStrikethrough: boolean;
+  isSubscript: boolean;
+  isSuperscript: boolean;
+  isUnorderedList: boolean;
+  isOrderedList: boolean;
   alignment: string;
   onPrint: () => void;
   onZoom: (delta: number) => void;
+  lineSpacing: string;
+  onLineSpacingChange: (spacing: string) => void;
+  citationStyle: string;
+  onCitationStyleChange: (style: string) => void;
 }
 
 // ─── Helper sub-components ────────────────────────────────────────────────────
@@ -56,17 +67,113 @@ interface RibbonProps {
 const RibbonChunk = ({
   label,
   children,
+  launcher,
 }: {
   label: string;
   children: React.ReactNode;
+  launcher?: React.ReactNode;
 }) => (
   <div className="ribbon-chunk">
     <div className="ribbon-chunk__controls">{children}</div>
-    <div className="ribbon-chunk__label">{label}</div>
+    <div className="ribbon-chunk__label">
+      <span>{label}</span>
+      {launcher && <span className="ribbon-chunk__launcher">{launcher}</span>}
+    </div>
   </div>
 );
 
 const RibbonDivider = () => <div className="ribbon-divider" />;
+
+// ─── Dialog Launcher Icon ────────────────────────────────────────────────────
+
+const DialogLauncherIcon = () => (
+  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+    <rect x="0.75" y="0.75" width="8.5" height="8.5" rx="1" stroke="currentColor" strokeWidth="1" />
+    <path
+      d="M3.5 3.5 L6.5 6.5 M6.5 6.5 L4.5 6.5 M6.5 6.5 L6.5 4.5"
+      stroke="currentColor"
+      strokeWidth="1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+// ─── Citation Style Dropdown ─────────────────────────────────────────────────
+
+const CITATION_STYLE_OPTIONS = ['APA v7', 'APA v6', 'MLA', 'Chicago'] as const;
+
+interface CitationStyleDropdownProps {
+  value: string;
+  onChange: (style: string) => void;
+}
+
+const CitationStyleDropdown = ({ value, onChange }: CitationStyleDropdownProps) => {
+  const [open, setOpen] = React.useState(false);
+  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const menuRef = React.useRef<HTMLUListElement>(null);
+  const btnRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (!wrapperRef.current?.contains(target) && !menuRef.current?.contains(target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [open]);
+
+  const handleToggle = () => {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setMenuPos({ top: rect.bottom + 2, left: rect.left });
+    }
+    setOpen((o) => !o);
+  };
+
+  return (
+    <div ref={wrapperRef} className="citation-style-launcher">
+      <button
+        ref={btnRef}
+        type="button"
+        className="citation-style-launcher-btn"
+        onClick={handleToggle}
+        aria-label="Citation and document style"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        title="Citation &amp; Document Style"
+      >
+        <DialogLauncherIcon />
+      </button>
+      {open && typeof document !== 'undefined' && ReactDOM.createPortal(
+        <ul
+          ref={menuRef}
+          className="citation-style-menu"
+          role="listbox"
+          aria-label="Citation style options"
+          style={{ top: menuPos.top, left: menuPos.left }}
+        >
+          {CITATION_STYLE_OPTIONS.map((s) => (
+            <li key={s} role="option" aria-selected={s === value}>
+              <button
+                type="button"
+                className={`citation-style-menu-item${s === value ? ' citation-style-menu-item--active' : ''}`}
+                onClick={() => { onChange(s); setOpen(false); }}
+              >
+                {s}
+              </button>
+            </li>
+          ))}
+        </ul>,
+        document.body
+      )}
+    </div>
+  );
+};
 
 // ─── Ribbon ───────────────────────────────────────────────────────────────────
 
@@ -89,6 +196,80 @@ const STYLES: { label: string; cmd: string; val: string }[] = [
   { label: 'Heading 3', cmd: 'formatBlock', val: 'h3' },
 ];
 
+const LINE_SPACINGS = ['1.0', '1.15', '1.5', '2.0', '2.5', '3.0'];
+
+interface LineSpacingDropdownProps {
+  value: string;
+  onChange: (spacing: string) => void;
+}
+
+const LineSpacingDropdown = ({ value, onChange }: LineSpacingDropdownProps) => {
+  const [open, setOpen] = React.useState(false);
+  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const menuRef = React.useRef<HTMLUListElement>(null);
+  const btnRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (!wrapperRef.current?.contains(target) && !menuRef.current?.contains(target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [open]);
+
+  const handleToggle = () => {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setMenuPos({ top: rect.bottom, left: rect.left });
+    }
+    setOpen((o) => !o);
+  };
+
+  return (
+    <div ref={wrapperRef} className="line-spacing-dropdown">
+      <button
+        ref={btnRef}
+        type="button"
+        className="line-spacing-btn"
+        onClick={handleToggle}
+        aria-label="Line Spacing"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <TextLineSpacing size={16} />
+        <ChevronDown size={12} />
+      </button>
+      {open && typeof document !== 'undefined' && ReactDOM.createPortal(
+        <ul
+          ref={menuRef}
+          className="line-spacing-menu"
+          role="listbox"
+          aria-label="Line spacing options"
+          style={{ top: menuPos.top, left: menuPos.left }}
+        >
+          {LINE_SPACINGS.map((s) => (
+            <li key={s} role="option" aria-selected={s === value}>
+              <button
+                type="button"
+                className={`line-spacing-menu-item${s === value ? ' line-spacing-menu-item--active' : ''}`}
+                onClick={() => { onChange(s); setOpen(false); }}
+              >
+                {s}
+              </button>
+            </li>
+          ))}
+        </ul>,
+        document.body
+      )}
+    </div>
+  );
+};
+
 const Ribbon = ({
   onFormat,
   fontSize,
@@ -98,9 +279,18 @@ const Ribbon = ({
   isBold,
   isItalic,
   isUnderline,
+  isStrikethrough,
+  isSubscript,
+  isSuperscript,
+  isUnorderedList,
+  isOrderedList,
   alignment,
   onPrint,
   onZoom,
+  lineSpacing,
+  onLineSpacingChange,
+  citationStyle,
+  onCitationStyleChange,
 }: RibbonProps) => {
   const fmt = (cmd: string, val?: string) => () => onFormat(cmd, val);
 
@@ -109,11 +299,11 @@ const Ribbon = ({
       <Tabs>
         <TabList aria-label="Ribbon tabs">
           <Tab>Home</Tab>
-          <Tab>Insert</Tab>
+          {/* <Tab>Insert</Tab>
           <Tab>Page Layout</Tab>
           <Tab>References</Tab>
           <Tab>Review</Tab>
-          <Tab>View</Tab>
+          <Tab>View</Tab> */}
         </TabList>
 
         <TabPanels>
@@ -124,18 +314,19 @@ const Ribbon = ({
               <RibbonChunk label="Clipboard">
                 <div className="ribbon-clipboard">
                   <div className="ribbon-clipboard__paste">
-                    <Button
+                    <Button className="items-center"
                       kind="ghost"
                       size="sm"
+                      hasIconOnly
                       renderIcon={Paste}
                       iconDescription="Paste"
+                      tooltipPosition="bottom"
                       onClick={fmt('paste')}
                     >
-                      Paste
                     </Button>
                   </div>
                   <div className="ribbon-clipboard__small">
-                    <Button
+                    <Button className="items-center"
                       kind="ghost"
                       size="sm"
                       hasIconOnly
@@ -144,13 +335,13 @@ const Ribbon = ({
                       tooltipPosition="bottom"
                       onClick={fmt('cut')}
                     />
-                    <Button
+                    <Button className="items-center"
                       kind="ghost"
                       size="sm"
                       hasIconOnly
                       renderIcon={Copy}
                       iconDescription="Copy"
-                      tooltipPosition="bottom"
+                      tooltipPosition="top"
                       onClick={fmt('copy')}
                     />
                   </div>
@@ -167,6 +358,7 @@ const Ribbon = ({
                     onChange={(e) => onFontFamilyChange(e.target.value)}
                     aria-label="Font family"
                   >
+                    <option value="" />
                     {FONTS.map((f) => (
                       <option key={f} value={f}>
                         {f}
@@ -179,6 +371,7 @@ const Ribbon = ({
                     onChange={(e) => onFontSizeChange(e.target.value)}
                     aria-label="Font size"
                   >
+                    <option value="" />
                     {SIZES.map((s) => (
                       <option key={s} value={s}>
                         {s}
@@ -187,7 +380,7 @@ const Ribbon = ({
                   </select>
                 </div>
                 <div className="ribbon-row">
-                  <Button
+                  <Button className="items-center"
                     kind={isBold ? 'primary' : 'ghost'}
                     size="sm"
                     hasIconOnly
@@ -196,7 +389,7 @@ const Ribbon = ({
                     tooltipPosition="bottom"
                     onClick={fmt('bold')}
                   />
-                  <Button
+                  <Button className="items-center"
                     kind={isItalic ? 'primary' : 'ghost'}
                     size="sm"
                     hasIconOnly
@@ -205,7 +398,7 @@ const Ribbon = ({
                     tooltipPosition="bottom"
                     onClick={fmt('italic')}
                   />
-                  <Button
+                  <Button className="items-center"
                     kind={isUnderline ? 'primary' : 'ghost'}
                     size="sm"
                     hasIconOnly
@@ -214,8 +407,8 @@ const Ribbon = ({
                     tooltipPosition="bottom"
                     onClick={fmt('underline')}
                   />
-                  <Button
-                    kind="ghost"
+                  <Button className="items-center"
+                    kind={isStrikethrough ? 'primary' : 'ghost'}
                     size="sm"
                     hasIconOnly
                     renderIcon={TextStrikethrough}
@@ -223,8 +416,8 @@ const Ribbon = ({
                     tooltipPosition="bottom"
                     onClick={fmt('strikeThrough')}
                   />
-                  <Button
-                    kind="ghost"
+                  <Button className="items-center"
+                    kind={isSubscript ? 'primary' : 'ghost'}
                     size="sm"
                     hasIconOnly
                     renderIcon={TextSubscript}
@@ -232,8 +425,8 @@ const Ribbon = ({
                     tooltipPosition="bottom"
                     onClick={fmt('subscript')}
                   />
-                  <Button
-                    kind="ghost"
+                  <Button className="items-center"
+                    kind={isSuperscript ? 'primary' : 'ghost'}
                     size="sm"
                     hasIconOnly
                     renderIcon={TextSuperscript}
@@ -241,7 +434,7 @@ const Ribbon = ({
                     tooltipPosition="bottom"
                     onClick={fmt('superscript')}
                   />
-                  <Button
+                  <Button className="items-center"
                     kind="ghost"
                     size="sm"
                     hasIconOnly
@@ -250,7 +443,7 @@ const Ribbon = ({
                     tooltipPosition="bottom"
                     onClick={fmt('hiliteColor', '#FFFF00')}
                   />
-                  <Button
+                  <Button className="items-center"
                     kind="ghost"
                     size="sm"
                     hasIconOnly
@@ -266,8 +459,8 @@ const Ribbon = ({
               {/* Paragraph */}
               <RibbonChunk label="Paragraph">
                 <div className="ribbon-row">
-                  <Button
-                    kind="ghost"
+                  <Button className="items-center"
+                    kind={isUnorderedList ? 'primary' : 'ghost'}
                     size="sm"
                     hasIconOnly
                     renderIcon={ListBulleted}
@@ -275,8 +468,8 @@ const Ribbon = ({
                     tooltipPosition="bottom"
                     onClick={fmt('insertUnorderedList')}
                   />
-                  <Button
-                    kind="ghost"
+                  <Button className="items-center"
+                    kind={isOrderedList ? 'primary' : 'ghost'}
                     size="sm"
                     hasIconOnly
                     renderIcon={ListNumbered}
@@ -284,7 +477,7 @@ const Ribbon = ({
                     tooltipPosition="bottom"
                     onClick={fmt('insertOrderedList')}
                   />
-                  <Button
+                  <Button className="items-center"
                     kind="ghost"
                     size="sm"
                     hasIconOnly
@@ -293,7 +486,7 @@ const Ribbon = ({
                     tooltipPosition="bottom"
                     onClick={fmt('outdent')}
                   />
-                  <Button
+                  <Button className="items-center"
                     kind="ghost"
                     size="sm"
                     hasIconOnly
@@ -302,50 +495,43 @@ const Ribbon = ({
                     tooltipPosition="bottom"
                     onClick={fmt('indent')}
                   />
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextLineSpacing}
-                    iconDescription="Line Spacing"
-                    tooltipPosition="bottom"
-                  />
+                  <LineSpacingDropdown value={lineSpacing} onChange={onLineSpacingChange} />
                 </div>
                 <div className="ribbon-row">
-                  <Button
+                  <Button className="items-center"
                     kind={alignment === 'left' ? 'primary' : 'ghost'}
                     size="sm"
                     hasIconOnly
                     renderIcon={TextAlignLeft}
                     iconDescription="Align Left"
-                    tooltipPosition="bottom"
+                    tooltipPosition="top"
                     onClick={fmt('justifyLeft')}
                   />
-                  <Button
+                  <Button className="items-center"
                     kind={alignment === 'center' ? 'primary' : 'ghost'}
                     size="sm"
                     hasIconOnly
                     renderIcon={TextAlignCenter}
                     iconDescription="Center"
-                    tooltipPosition="bottom"
+                    tooltipPosition="top"
                     onClick={fmt('justifyCenter')}
                   />
-                  <Button
+                  <Button className="items-center"
                     kind={alignment === 'right' ? 'primary' : 'ghost'}
                     size="sm"
                     hasIconOnly
                     renderIcon={TextAlignRight}
                     iconDescription="Align Right"
-                    tooltipPosition="bottom"
+                    tooltipPosition="top"
                     onClick={fmt('justifyRight')}
                   />
-                  <Button
+                  <Button className="items-center"
                     kind={alignment === 'justify' ? 'primary' : 'ghost'}
                     size="sm"
                     hasIconOnly
                     renderIcon={TextAlignJustify}
                     iconDescription="Justify"
-                    tooltipPosition="bottom"
+                    tooltipPosition="top"
                     onClick={fmt('justifyFull')}
                   />
                 </div>
@@ -353,14 +539,22 @@ const Ribbon = ({
               <RibbonDivider />
 
               {/* Styles */}
-              <RibbonChunk label="Styles">
+              <RibbonChunk
+                label="Styles"
+                launcher={
+                  <CitationStyleDropdown
+                    value={citationStyle}
+                    onChange={onCitationStyleChange}
+                  />
+                }
+              >
                 <div className="ribbon-styles">
                   {STYLES.map((style) => (
                     <Button
                       key={style.label}
                       kind="ghost"
                       size="sm"
-                      className="ribbon-style-btn"
+                      className="ribbon-style-btn items-center"
                       onClick={() => onFormat(style.cmd, style.val)}
                     >
                       {style.label}
@@ -371,7 +565,7 @@ const Ribbon = ({
               <RibbonDivider />
 
               {/* Editing */}
-              <RibbonChunk label="Editing">
+              {/* <RibbonChunk label="Editing">
                 <div className="ribbon-row">
                   <Button
                     kind="ghost"
@@ -403,7 +597,7 @@ const Ribbon = ({
                     Redo
                   </Button>
                 </div>
-              </RibbonChunk>
+              </RibbonChunk> */}
             </div>
           </TabPanel>
 

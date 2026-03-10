@@ -6,6 +6,9 @@ import { Providers } from './providers';
 export const metadata: Metadata = {
   title: "Carbon Type",
   description: "A Word 2010-style document editor built with IBM Carbon components",
+  icons: {
+    icon: '/icon.svg',
+  }
 };
 
 export default function RootLayout({
