@@ -1,6 +1,6 @@
 {
-  "name": "next-carbon-template",
-  "version": "0.1.0",
+  "name": "carbon-type",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -13,12 +13,14 @@
     "@carbon/react": "^1.77.0",
     "@carbon/styles": "^1.76.0",
     "autoprefixer": "^10.4.21",
+    "html-docx-js": "^0.3.1",
     "next": "15.5.12",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/html-docx-js": "^0.3.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
