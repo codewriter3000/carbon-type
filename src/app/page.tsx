@@ -51,6 +51,11 @@ export default function WordProcessor() {
   const [citationStyle, setCitationStyle] = useState('');
   const [alignment, setAlignment] = useState('left');
   const [zoom, setZoom] = useState(100);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   // Convert <font face="..."> tags (created by execCommand) to <span style="font-family: '...'"> so
   // that Word's HTML renderer handles multi-word font names (e.g. Times New Roman) reliably.
@@ -408,6 +413,11 @@ export default function WordProcessor() {
 
   // Scale factor as a fraction (e.g. 0.8 for 80%)
   const scaleFactor = zoom / 100;
+
+  if (!isHydrated) {
+    // Keep server and first client render identical to avoid Carbon tooltip/tab ID mismatches.
+    return <div className="word-processor" aria-hidden="true" />;
+  }
 
   return (
     <div className="word-processor">
