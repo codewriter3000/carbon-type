@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Button, Toggle } from '@carbon/react';
-import { Save, Undo, Redo, Printer } from '@carbon/icons-react';
 import { asBlob } from 'html-docx-js/dist/html-docx';
 import Ribbon from '@/components/Ribbon/Ribbon';
 import DocumentEditor from '@/components/DocumentEditor/DocumentEditor';
+import WordTitleBar from '@/components/WordTitleBar/WordTitleBar';
+import WordStatusBar from '@/components/WordStatusBar/WordStatusBar';
 
 type TextAlignment = 'left' | 'center' | 'right' | 'justify';
 
@@ -411,76 +411,22 @@ export default function WordProcessor() {
 
   return (
     <div className="word-processor">
-      {/* Title Bar */}
-      <div className="word-title-bar">
-        <div className="word-title-bar__quick-access">
-          <Button
-            kind="ghost"
-            size="sm"
-            hasIconOnly
-            renderIcon={Save}
-            iconDescription="Save"
-            tooltipPosition="bottom"
-            onClick={handleSave}
-          />
-          <Button
-            kind="ghost"
-            size="sm"
-            hasIconOnly
-            renderIcon={Undo}
-            iconDescription="Undo"
-            tooltipPosition="bottom"
-            onClick={() => handleFormat('undo')}
-          />
-          <Button
-            kind="ghost"
-            size="sm"
-            hasIconOnly
-            renderIcon={Redo}
-            iconDescription="Redo"
-            tooltipPosition="bottom"
-            onClick={() => handleFormat('redo')}
-          />
-        </div>
-
-        <div className="word-title-bar__document-title">
-          {documentName} — Carbon Type
-        </div>
-
-        <div className="word-title-bar__right">
-          {autosaveEnabled && autosaveStatus && (
-            <span className="word-title-bar__autosave-status">
-              {autosaveStatus === 'saving' ? 'Saving\u2026' : 'Autosaved'}
-            </span>
-          )}
-          <span className="word-title-bar__autosave-toggle">
-            <span className="word-title-bar__autosave-toggle-label">Autosave</span>
-            <Toggle
-              id="autosave-toggle"
-              size="sm"
-              labelText="Autosave"
-              hideLabel
-              toggled={autosaveEnabled}
-              onToggle={(checked: boolean) => {
-                setAutosaveEnabled(checked);
-                if (!checked) {
-                  if (autosaveClearTimerRef.current) clearTimeout(autosaveClearTimerRef.current);
-                  setAutosaveStatus('');
-                }
-              }}
-            />
-          </span>
-          <Button
-            kind="ghost"
-            size="sm"
-            hasIconOnly
-            renderIcon={Printer}
-            iconDescription="Print"
-            tooltipPosition="bottom"
-            onClick={handlePrint}
-          />
-        </div>
-      </div>
+      <WordTitleBar
+        documentName={documentName}
+        autosaveEnabled={autosaveEnabled}
+        autosaveStatus={autosaveStatus}
+        onAutosaveToggle={(checked: boolean) => {
+          setAutosaveEnabled(checked);
+          if (!checked) {
+            if (autosaveClearTimerRef.current) clearTimeout(autosaveClearTimerRef.current);
+            setAutosaveStatus('');
+          }
+        }}
+        onSave={handleSave}
+        onUndo={() => handleFormat('undo')}
+        onRedo={() => handleFormat('redo')}
+        onPrint={handlePrint}
+      />
 
       {/* Ribbon */}
       <Ribbon
@@ -528,14 +474,7 @@ export default function WordProcessor() {
         </div>
       </div>
 
-      {/* Status Bar */}
-      <div className="word-status-bar">
-        <span>Page 1 of 1</span>
-        <span className="word-status-bar__divider">|</span>
-        <span>Words: {wordCount}</span>
-        <span className="word-status-bar__divider">|</span>
-        <span>Zoom: {zoom}%</span>
-      </div>
+      <WordStatusBar wordCount={wordCount} zoom={zoom} />
     </div>
   );
 }
