@@ -279,8 +279,66 @@ html {
   .ribbon-style-btn.cds--btn {
     min-height: unset;
     padding: 3px 8px;
-    font-size: 11px;
     line-height: 1.2;
+  }
+}
+
+// ─── Custom format buttons (B / I / U etc.) ───────────────────────────────────
+
+.format-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  min-height: 22px;
+  padding: 2px 4px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  border-radius: 2px;
+  color: #222;
+  line-height: 1;
+
+  &:hover {
+    background: #dde0e5;
+  }
+
+  &--active {
+    background: #cce0ff;
+    border-color: #0f62fe;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #0f62fe;
+    outline-offset: 1px;
+  }
+}
+
+.format-btn__label {
+  font-family: 'Times New Roman', Georgia, serif;
+  font-size: 14px;
+  color: inherit;
+  line-height: 1;
+
+  &--bold {
+    font-weight: bold;
+  }
+
+  &--italic {
+    font-style: italic;
+  }
+
+  &--underline {
+    text-decoration: underline;
+  }
+
+  &--strikethrough {
+    text-decoration: line-through;
+  }
+
+  &--highlight {
+    background-color: #ffff00;
+    padding: 0 2px;
   }
 }
 
