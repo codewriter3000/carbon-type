@@ -65,13 +65,6 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-      # Attest the build provenance for supply chain security
-      - name: Attest Build Provenance
-        uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c  # v1.4.3
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        with:
-          subject-path: 'out/**/*'
-
   trigger-deployment:
     needs: build
     runs-on: ubuntu-latest
