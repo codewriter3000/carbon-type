@@ -15,7 +15,7 @@ permissions:
   id-token: write  # For artifact attestations
 
 env:
-  NODE_VERSION: '18.x'  # Adjust to your Node.js version
+  NODE_VERSION: '22.x'  # Adjust to your Node.js version
 
 jobs:
   build:
@@ -68,15 +68,15 @@ jobs:
       # Attest the build provenance for supply chain security
       - name: Attest Build Provenance
         uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c  # v1.4.3
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         with:
           subject-path: 'out/**/*'
 
   trigger-deployment:
     needs: build
     runs-on: ubuntu-latest
-    # CRITICAL: Only trigger deployment from main branch pushes, never from PRs
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # CRITICAL: Only trigger deployment from master branch pushes, never from PRs
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
 
     permissions:
       contents: read
@@ -88,10 +88,10 @@ jobs:
           github-token: ${{ secrets.DEPLOYMENT_TRIGGER_TOKEN }}
           script: |
             const response = await github.rest.actions.createWorkflowDispatch({
-              owner: 'YOUR-USERNAME',  // Replace with your GitHub username/org
-              repo: 'your-app-deployment',  // Replace with your private repo name
+              owner: 'codewriter3000',  // Replace with your GitHub username/org
+              repo: 'carbon-type-deployment',  // Replace with your private repo name
               workflow_id: 'deploy.yml',
-              ref: 'main',
+              ref: 'master',
               inputs: {
                 build_sha: '${{ github.sha }}',
                 public_repo: '${{ github.repository }}',
