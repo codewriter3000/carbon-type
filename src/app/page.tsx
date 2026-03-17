@@ -7,6 +7,15 @@ import { asBlob } from 'html-docx-js/dist/html-docx';
 import Ribbon from '@/components/Ribbon/Ribbon';
 import DocumentEditor from '@/components/DocumentEditor/DocumentEditor';
 
+type TextAlignment = 'left' | 'center' | 'right' | 'justify';
+
+const CITATION_CONFIGS = {
+  'APA v7':  { fontFamily: 'Calibri',          fontSize: '11', lineSpacing: '2.0', alignment: 'left' as TextAlignment, firstLineIndent: '0.5in' },
+  'APA v6':  { fontFamily: 'Times New Roman',   fontSize: '12', lineSpacing: '2.0', alignment: 'left' as TextAlignment, firstLineIndent: '0.5in' },
+  'MLA':     { fontFamily: 'Times New Roman',   fontSize: '12', lineSpacing: '2.0', alignment: 'left' as TextAlignment, firstLineIndent: '0.5in' },
+  'Chicago': { fontFamily: 'Times New Roman',   fontSize: '12', lineSpacing: '2.0', alignment: 'left' as TextAlignment, firstLineIndent: '0.5in' },
+} as const;
+
 export default function WordProcessor() {
   const editorRef = useRef<HTMLDivElement>(null);
   // Holds a font size to apply to the next typed character (collapsed-cursor case).
@@ -212,13 +221,6 @@ export default function WordProcessor() {
     setLineSpacing(spacing);
   }, []);
 
-  const CITATION_CONFIGS = {
-    'APA v7':  { fontFamily: 'Calibri',          fontSize: '11', lineSpacing: '2.0', alignment: 'left', firstLineIndent: '0.5in' },
-    'APA v6':  { fontFamily: 'Times New Roman',   fontSize: '12', lineSpacing: '2.0', alignment: 'left', firstLineIndent: '0.5in' },
-    'MLA':     { fontFamily: 'Times New Roman',   fontSize: '12', lineSpacing: '2.0', alignment: 'left', firstLineIndent: '0.5in' },
-    'Chicago': { fontFamily: 'Times New Roman',   fontSize: '12', lineSpacing: '2.0', alignment: 'left', firstLineIndent: '0.5in' },
-  } as const;
-
   const handleCitationStyleChange = useCallback((style: string) => {
     const el = editorRef.current;
     if (!el) return;
@@ -249,7 +251,7 @@ export default function WordProcessor() {
     });
 
     // Alignment.
-    const alignCmd =
+    const alignCmd: string =
       config.alignment === 'center'  ? 'justifyCenter' :
       config.alignment === 'right'   ? 'justifyRight'  :
       config.alignment === 'justify' ? 'justifyFull'   : 'justifyLeft';

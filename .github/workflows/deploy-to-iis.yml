@@ -1,0 +1,73 @@
+name: Build and Deploy Next.js
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18.x'
+
+jobs:
+  build:
+    runs-on: windows-latest  # GitHub-hosted runner for building
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js static export
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-build
+          path: out/
+          retention-days: 7
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    environment:
+      name: production  # Requires manual approval
+      url: https://your-site.com
+
+    # IMPORTANT: Only run on pushes to main, not on pull requests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-build
+          path: ./out
+
+      - name: Stop IIS App Pool
+        run: |
+          Import-Module WebAdministration
+          Stop-WebAppPool -Name "MyAppPool"
+        shell: powershell
+
+      - name: Deploy to IIS
+        run: |
+          $destPath = "C:\inetpub\wwwroot\myapp"
+          Remove-Item -Path "$destPath\*" -Recurse -Force
+          Copy-Item -Path ".\out\*" -Destination $destPath -Recurse -Force
+        shell: powershell
+
+      - name: Start IIS App Pool
+        run: |
+          Import-Module WebAdministration
+          Start-WebAppPool -Name "MyAppPool"
+        shell: powershell
