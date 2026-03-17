@@ -59,6 +59,22 @@ interface RibbonProps {
   onCitationStyleChange: (style: string) => void;
 }
 
+// ─── Mobile context / hook ────────────────────────────────────────────────────
+
+const RibbonMobileContext = React.createContext(false);
+
+const useMobileRibbon = () => {
+  const [isMobile, setIsMobile] = React.useState(false);
+  React.useEffect(() => {
+    const mq = window.matchMedia('(max-width: 815px)');
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return isMobile;
+};
+
 // ─── Helper sub-components ────────────────────────────────────────────────────
 
 const RibbonChunk = ({
@@ -69,15 +85,88 @@ const RibbonChunk = ({
   label: string;
   children: React.ReactNode;
   launcher?: React.ReactNode;
-}) => (
-  <div className="ribbon-chunk">
-    <div className="ribbon-chunk__controls">{children}</div>
-    <div className="ribbon-chunk__label">
-      <span>{label}</span>
-      {launcher && <span className="ribbon-chunk__launcher">{launcher}</span>}
+}) => {
+  const isMobile = React.useContext(RibbonMobileContext);
+  const [open, setOpen] = React.useState(false);
+  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
+  const btnRef = React.useRef<HTMLButtonElement>(null);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handleOutside = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (!btnRef.current?.contains(t) && !menuRef.current?.contains(t)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, [open]);
+
+  if (isMobile) {
+    const handleToggle = () => {
+      if (!open && btnRef.current) {
+        const rect = btnRef.current.getBoundingClientRect();
+        const MARGIN = 8;
+        // MIN_WIDTH matches the CSS min-width of .ribbon-chunk-mobile-dropdown.
+        // Using it as a lower-bound estimate lets us pre-clamp right overflow
+        // synchronously, without needing a post-render measurement.
+        const MIN_WIDTH = 180;
+        const vw = window.innerWidth;
+        const top = rect.bottom + 2;
+        let left = rect.left;
+        if (left + MIN_WIDTH + MARGIN > vw) left = vw - MIN_WIDTH - MARGIN;
+        if (left < MARGIN) left = MARGIN;
+        setMenuPos({ top, left });
+      }
+      setOpen((o) => !o);
+    };
+
+    return (
+      <>
+        <button
+          ref={btnRef}
+          type="button"
+          className={`ribbon-chunk-mobile-btn${open ? ' ribbon-chunk-mobile-btn--open' : ''}`}
+          onClick={handleToggle}
+          aria-haspopup="true"
+          aria-expanded={open}
+        >
+          {label}
+          <ChevronDown size={12} />
+        </button>
+        {open && typeof document !== 'undefined' && ReactDOM.createPortal(
+          <div
+            ref={menuRef}
+            className="ribbon-chunk-mobile-dropdown"
+            style={{
+              top: menuPos.top,
+              left: menuPos.left,
+              // Prevent bottom overflow via CSS — we know the top value so
+              // we can cap the height without needing a post-render measurement.
+              maxHeight: `calc(100vh - ${menuPos.top}px - 8px)`,
+            }}
+          >
+            {children}
+            {launcher && <div className="ribbon-chunk-mobile-dropdown__launcher">{launcher}</div>}
+          </div>,
+          document.body
+        )}
+      </>
+    );
+  }
+
+  return (
+    <div className="ribbon-chunk">
+      <div className="ribbon-chunk__controls">{children}</div>
+      <div className="ribbon-chunk__label">
+        <span>{label}</span>
+        {launcher && <span className="ribbon-chunk__launcher">{launcher}</span>}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const RibbonDivider = () => <div className="ribbon-divider" />;
 
@@ -290,6 +379,7 @@ const Ribbon = ({
   onCitationStyleChange,
 }: RibbonProps) => {
   const fmt = (cmd: string, val?: string) => () => onFormat(cmd, val);
+  const isMobile = useMobileRibbon();
   const NEW_ISSUE_URL = 'https://github.com/codewriter3000/carbon-type/issues/new';
   const HELP_LINKS = {
     featureRequest: NEW_ISSUE_URL,
@@ -303,7 +393,8 @@ const Ribbon = ({
   };
 
   return (
-    <div className="word-ribbon">
+    <RibbonMobileContext.Provider value={isMobile}>
+    <div className={`word-ribbon${isMobile ? ' word-ribbon--mobile' : ''}`}>
       <Tabs>
         <TabList aria-label="Ribbon tabs">
           <Tab>Home</Tab>
@@ -804,6 +895,7 @@ const Ribbon = ({
         </TabPanels>
       </Tabs>
     </div>
+    </RibbonMobileContext.Provider>
   );
 };
 
