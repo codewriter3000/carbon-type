@@ -4,10 +4,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Tabs, Tab, TabList, TabPanels, TabPanel, Button } from '@carbon/react';
 import {
-  TextBold,
-  TextItalic,
-  TextUnderline,
-  TextStrikethrough,
   TextAlignLeft,
   TextAlignCenter,
   TextAlignRight,
@@ -22,9 +18,6 @@ import {
   Link,
   TextIndentMore,
   TextIndentLess,
-  TextSubscript,
-  TextSuperscript,
-  TextHighlight,
   TextClearFormat,
   TextLineSpacing,
   SpellCheck,
@@ -170,6 +163,31 @@ const RibbonChunk = ({
 
 const RibbonDivider = () => <div className="ribbon-divider" />;
 
+// ─── Format Button (styled-text toggle button) ────────────────────────────────
+
+const FormatButton = ({
+  active = false,
+  onClick,
+  title,
+  children,
+}: {
+  active?: boolean;
+  onClick: () => void;
+  title: string;
+  children: React.ReactNode;
+}) => (
+  <button
+    type="button"
+    className={`format-btn${active ? ' format-btn--active' : ''}`}
+    onClick={onClick}
+    title={title}
+    aria-label={title}
+    aria-pressed={active}
+  >
+    {children}
+  </button>
+);
+
 // ─── Dialog Launcher Icon ────────────────────────────────────────────────────
 
 const DialogLauncherIcon = () => (
@@ -275,11 +293,52 @@ const FONTS = [
 ];
 const SIZES = ['8', '9', '10', '11', '12', '14', '16', '18', '20', '24', '28', '32', '36', '48', '72'];
 
-const STYLES: { label: string; cmd: string; val: string }[] = [
-  { label: 'Normal', cmd: 'formatBlock', val: 'p' },
-  { label: 'Heading 1', cmd: 'formatBlock', val: 'h1' },
-  { label: 'Heading 2', cmd: 'formatBlock', val: 'h2' },
-  { label: 'Heading 3', cmd: 'formatBlock', val: 'h3' },
+const STYLES: { label: string; cmd: string; val: string; previewStyle: React.CSSProperties }[] = [
+  {
+    label: 'Normal',
+    cmd: 'formatBlock',
+    val: 'p',
+    previewStyle: {
+      fontFamily: 'Calibri, sans-serif',
+      fontSize: '11px',
+      fontWeight: '400',
+      color: '#161616',
+    },
+  },
+  {
+    label: 'Heading 1',
+    cmd: 'formatBlock',
+    val: 'h1',
+    previewStyle: {
+      fontFamily: "'Calibri Light', Calibri, sans-serif",
+      fontSize: '15px',
+      fontWeight: '700',
+      color: '#2e74b5',
+    },
+  },
+  {
+    label: 'Heading 2',
+    cmd: 'formatBlock',
+    val: 'h2',
+    previewStyle: {
+      fontFamily: "'Calibri Light', Calibri, sans-serif",
+      fontSize: '13px',
+      fontWeight: '700',
+      color: '#2e74b5',
+    },
+  },
+  {
+    label: 'Heading 3',
+    cmd: 'formatBlock',
+    val: 'h3',
+    previewStyle: {
+      fontFamily: "'Calibri Light', Calibri, sans-serif",
+      fontSize: '12px',
+      fontWeight: '700',
+      fontStyle: 'italic',
+      color: '#1f3864',
+    },
+  },
 ];
 
 const LINE_SPACINGS = ['1.0', '1.15', '1.5', '2.0', '2.5', '3.0'];
@@ -480,69 +539,27 @@ const Ribbon = ({
                   </select>
                 </div>
                 <div className="ribbon-row">
-                  <Button className="items-center"
-                    kind={isBold ? 'primary' : 'ghost'}
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextBold}
-                    iconDescription="Bold"
-                    tooltipPosition="bottom"
-                    onClick={fmt('bold')}
-                  />
-                  <Button className="items-center"
-                    kind={isItalic ? 'primary' : 'ghost'}
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextItalic}
-                    iconDescription="Italic"
-                    tooltipPosition="bottom"
-                    onClick={fmt('italic')}
-                  />
-                  <Button className="items-center"
-                    kind={isUnderline ? 'primary' : 'ghost'}
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextUnderline}
-                    iconDescription="Underline"
-                    tooltipPosition="bottom"
-                    onClick={fmt('underline')}
-                  />
-                  <Button className="items-center"
-                    kind={isStrikethrough ? 'primary' : 'ghost'}
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextStrikethrough}
-                    iconDescription="Strikethrough"
-                    tooltipPosition="bottom"
-                    onClick={fmt('strikeThrough')}
-                  />
-                  <Button className="items-center"
-                    kind={isSubscript ? 'primary' : 'ghost'}
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextSubscript}
-                    iconDescription="Subscript"
-                    tooltipPosition="bottom"
-                    onClick={fmt('subscript')}
-                  />
-                  <Button className="items-center"
-                    kind={isSuperscript ? 'primary' : 'ghost'}
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextSuperscript}
-                    iconDescription="Superscript"
-                    tooltipPosition="bottom"
-                    onClick={fmt('superscript')}
-                  />
-                  <Button className="items-center"
-                    kind="ghost"
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextHighlight}
-                    iconDescription="Highlight"
-                    tooltipPosition="bottom"
-                    onClick={fmt('hiliteColor', '#FFFF00')}
-                  />
+                  <FormatButton active={isBold} onClick={fmt('bold')} title="Bold">
+                    <span className="format-btn__label format-btn__label--bold">B</span>
+                  </FormatButton>
+                  <FormatButton active={isItalic} onClick={fmt('italic')} title="Italic">
+                    <span className="format-btn__label format-btn__label--italic">I</span>
+                  </FormatButton>
+                  <FormatButton active={isUnderline} onClick={fmt('underline')} title="Underline">
+                    <span className="format-btn__label format-btn__label--underline">U</span>
+                  </FormatButton>
+                  <FormatButton active={isStrikethrough} onClick={fmt('strikeThrough')} title="Strikethrough">
+                    <span className="format-btn__label format-btn__label--strikethrough">S</span>
+                  </FormatButton>
+                  <FormatButton active={isSubscript} onClick={fmt('subscript')} title="Subscript">
+                    <span className="format-btn__label">X<sub>2</sub></span>
+                  </FormatButton>
+                  <FormatButton active={isSuperscript} onClick={fmt('superscript')} title="Superscript">
+                    <span className="format-btn__label">X<sup>2</sup></span>
+                  </FormatButton>
+                  <FormatButton onClick={fmt('hiliteColor', '#FFFF00')} title="Highlight">
+                    <span className="format-btn__label format-btn__label--highlight">A</span>
+                  </FormatButton>
                   <Button className="items-center"
                     kind="ghost"
                     size="sm"
@@ -657,7 +674,7 @@ const Ribbon = ({
                       className="ribbon-style-btn items-center"
                       onClick={() => onFormat(style.cmd, style.val)}
                     >
-                      {style.label}
+                      <span style={style.previewStyle}>{style.label}</span>
                     </Button>
                   ))}
                 </div>
