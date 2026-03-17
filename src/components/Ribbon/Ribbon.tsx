@@ -14,7 +14,7 @@ import {
 } from '@carbon/icons-react';
 import HelpTabPanel from './HelpTabPanel';
 import HomeTabPanel from './HomeTabPanel';
-import { RibbonChunk, RibbonDivider } from './RibbonControls';
+import { RibbonChunk, RibbonDivider, RibbonMobileContext, useMobileRibbon } from './RibbonControls';
 import { RibbonProps } from './types';
 
 const Ribbon = ({
@@ -39,12 +39,15 @@ const Ribbon = ({
   citationStyle,
   onCitationStyleChange,
 }: RibbonProps) => {
+  const isMobile = useMobileRibbon();
+
   const openHelpLink = (url: string) => () => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
-    <div className="word-ribbon">
+    <RibbonMobileContext.Provider value={isMobile}>
+    <div className={`word-ribbon${isMobile ? ' word-ribbon--mobile' : ''}`}>
       <Tabs>
         <TabList aria-label="Ribbon tabs">
           <Tab>Home</Tab>
@@ -251,6 +254,7 @@ const Ribbon = ({
         </TabPanels>
       </Tabs>
     </div>
+    </RibbonMobileContext.Provider>
   );
 };
 

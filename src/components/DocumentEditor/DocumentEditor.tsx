@@ -42,6 +42,35 @@ const DocumentEditor = forwardRef<HTMLDivElement, DocumentEditorProps>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ref]);
 
+    // Scroll the cursor into view when the soft keyboard opens on mobile.
+    // The Visual Viewport API fires a "resize" event whenever the visible area
+    // shrinks (e.g. keyboard appearing). If the cursor ends up below the new
+    // viewport bottom we nudge it back into view.
+    useEffect(() => {
+      const vv = window.visualViewport;
+      if (!vv) return;
+
+      const scrollCursorIntoView = () => {
+        const sel = window.getSelection();
+        if (!sel || !sel.rangeCount) return;
+
+        const rects = sel.getRangeAt(0).getClientRects();
+        if (!rects.length) return;
+        const cursorRect = rects[rects.length - 1];
+
+        if (cursorRect.bottom > vv.offsetTop + vv.height) {
+          const focusEl =
+            sel.focusNode?.nodeType === Node.TEXT_NODE
+              ? sel.focusNode.parentElement
+              : (sel.focusNode as Element | null);
+          focusEl?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+      };
+
+      vv.addEventListener('resize', scrollCursorIntoView);
+      return () => vv.removeEventListener('resize', scrollCursorIntoView);
+    }, []);
+
     const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
       const el = e.currentTarget;
       const text = el.innerText;
