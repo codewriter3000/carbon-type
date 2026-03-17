@@ -380,6 +380,17 @@ const Ribbon = ({
 }: RibbonProps) => {
   const fmt = (cmd: string, val?: string) => () => onFormat(cmd, val);
   const isMobile = useMobileRibbon();
+  const NEW_ISSUE_URL = 'https://github.com/codewriter3000/carbon-type/issues/new';
+  const HELP_LINKS = {
+    featureRequest: NEW_ISSUE_URL,
+    bug: NEW_ISSUE_URL,
+    vulnerability:
+      'mailto:alex@amicharski.com?subject=Security%20Vulnerability%3A%20Carbon%20Type',
+    contribute: 'https://github.com/codewriter3000/carbon-type',
+  } as const;
+  const navigateTo = (destination: keyof typeof HELP_LINKS) => () => {
+    window.location.assign(HELP_LINKS[destination]);
+  };
 
   return (
     <RibbonMobileContext.Provider value={isMobile}>
@@ -387,11 +398,12 @@ const Ribbon = ({
       <Tabs>
         <TabList aria-label="Ribbon tabs">
           <Tab>Home</Tab>
-          {/* <Tab>Insert</Tab>
+          <Tab>Help</Tab>
+          <Tab>Insert</Tab>
           <Tab>Page Layout</Tab>
           <Tab>References</Tab>
           <Tab>Review</Tab>
-          <Tab>View</Tab> */}
+          <Tab>View</Tab>
         </TabList>
 
         <TabPanels>
@@ -686,6 +698,28 @@ const Ribbon = ({
                   </Button>
                 </div>
               </RibbonChunk> */}
+            </div>
+          </TabPanel>
+
+          {/* ── Help ─────────────────────────────────────────────────────── */}
+          <TabPanel>
+            <div className="ribbon-panel">
+              <RibbonChunk label="Support">
+                <div className="ribbon-row">
+                  <Button kind="ghost" size="sm" onClick={navigateTo('featureRequest')}>
+                    Feature Request
+                  </Button>
+                  <Button kind="ghost" size="sm" onClick={navigateTo('bug')}>
+                    Bug
+                  </Button>
+                  <Button kind="ghost" size="sm" onClick={navigateTo('vulnerability')}>
+                    Vulnerability
+                  </Button>
+                  <Button kind="ghost" size="sm" onClick={navigateTo('contribute')}>
+                    Contribute
+                  </Button>
+                </div>
+              </RibbonChunk>
             </div>
           </TabPanel>
 
