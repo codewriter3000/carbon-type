@@ -56,7 +56,7 @@ const Ribbon = ({
           <Tab>Page Layout</Tab>
           <Tab>References</Tab>
           <Tab>Review</Tab>
-          <Tab>View</Tab> */}
+          <Tab>View</Tab>*/}
         </TabList>
 
         <TabPanels>
