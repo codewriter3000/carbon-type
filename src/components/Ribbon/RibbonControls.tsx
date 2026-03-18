@@ -1,7 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ChevronDown, TextLineSpacing } from '@carbon/icons-react';
-import { CITATION_STYLE_OPTIONS, LINE_SPACINGS } from './ribbonConfig';
+import {
+  CASE_OPTIONS,
+  CITATION_STYLE_OPTIONS,
+  FONT_COLOR_OPTIONS,
+  HIGHLIGHT_COLOR_OPTIONS,
+  LINE_SPACINGS,
+  TEXT_EFFECT_OPTIONS,
+} from './ribbonConfig';
 
 export const RibbonMobileContext = React.createContext(false);
 
@@ -261,6 +268,294 @@ export const LineSpacingDropdown = ({ value, onChange }: { value: string; onChan
                 onClick={() => { onChange(s); setOpen(false); }}
               >
                 {s}
+              </button>
+            </li>
+          ))}
+        </ul>,
+        document.body
+      )}
+    </div>
+  );
+};
+
+export const ChangeCaseDropdown = ({ onChange }: { onChange: (mode: string) => void }) => {
+  const [open, setOpen] = React.useState(false);
+  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const menuRef = React.useRef<HTMLUListElement>(null);
+  const btnRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (!wrapperRef.current?.contains(target) && !menuRef.current?.contains(target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [open]);
+
+  const handleToggle = () => {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setMenuPos({ top: rect.bottom, left: rect.left });
+    }
+    setOpen((o) => !o);
+  };
+
+  return (
+    <div ref={wrapperRef} className="change-case-dropdown">
+      <button
+        ref={btnRef}
+        type="button"
+        className="change-case-btn"
+        onClick={handleToggle}
+        aria-label="Change case"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        title="Change case"
+      >
+        <span className="change-case-btn__text">Aa</span>
+        <ChevronDown size={12} />
+      </button>
+      {open && typeof document !== 'undefined' && ReactDOM.createPortal(
+        <ul
+          ref={menuRef}
+          className="change-case-menu"
+          role="listbox"
+          aria-label="Change case options"
+          style={{ top: menuPos.top, left: menuPos.left }}
+        >
+          {CASE_OPTIONS.map((option) => (
+            <li key={option.value} role="option" aria-selected={false}>
+              <button
+                type="button"
+                className="change-case-menu-item"
+                onClick={() => { onChange(option.value); setOpen(false); }}
+              >
+                {option.label}
+              </button>
+            </li>
+          ))}
+        </ul>,
+        document.body
+      )}
+    </div>
+  );
+};
+
+export const TextEffectsDropdown = ({ onChange }: { onChange: (effect: string) => void }) => {
+  const [open, setOpen] = React.useState(false);
+  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const menuRef = React.useRef<HTMLUListElement>(null);
+  const btnRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (!wrapperRef.current?.contains(target) && !menuRef.current?.contains(target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [open]);
+
+  const handleToggle = () => {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setMenuPos({ top: rect.bottom, left: rect.left });
+    }
+    setOpen((o) => !o);
+  };
+
+  return (
+    <div ref={wrapperRef} className="text-effects-dropdown">
+      <button
+        ref={btnRef}
+        type="button"
+        className="text-effects-btn"
+        onClick={handleToggle}
+        aria-label="Text effects and typography"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        title="Text effects and typography"
+      >
+        <span className="text-effects-btn__text">A</span>
+        <ChevronDown size={12} />
+      </button>
+      {open && typeof document !== 'undefined' && ReactDOM.createPortal(
+        <ul
+          ref={menuRef}
+          className="text-effects-menu"
+          role="listbox"
+          aria-label="Text effects and typography options"
+          style={{ top: menuPos.top, left: menuPos.left }}
+        >
+          {TEXT_EFFECT_OPTIONS.map((option) => (
+            <li key={option.value} role="option" aria-selected={false}>
+              <button
+                type="button"
+                className="text-effects-menu-item"
+                onClick={() => { onChange(option.value); setOpen(false); }}
+              >
+                {option.label}
+              </button>
+            </li>
+          ))}
+        </ul>,
+        document.body
+      )}
+    </div>
+  );
+};
+
+const ColorSwatch = ({ color }: { color: string }) => (
+  <span
+    className="color-option-swatch"
+    style={{ backgroundColor: color === 'transparent' ? '#ffffff' : color }}
+    aria-hidden="true"
+  />
+);
+
+export const FontColorDropdown = ({ onChange }: { onChange: (color: string) => void }) => {
+  const [open, setOpen] = React.useState(false);
+  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const menuRef = React.useRef<HTMLUListElement>(null);
+  const btnRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (!wrapperRef.current?.contains(target) && !menuRef.current?.contains(target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [open]);
+
+  const handleToggle = () => {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setMenuPos({ top: rect.bottom, left: rect.left });
+    }
+    setOpen((o) => !o);
+  };
+
+  return (
+    <div ref={wrapperRef} className="font-color-dropdown">
+      <button
+        ref={btnRef}
+        type="button"
+        className="font-color-btn"
+        onClick={handleToggle}
+        aria-label="Font color"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        title="Font color"
+      >
+        <span className="font-color-btn__glyph" aria-hidden="true">
+          <span className="font-color-btn__text">A</span>
+          <span className="font-color-btn__bar" />
+        </span>
+        <ChevronDown size={12} />
+      </button>
+      {open && typeof document !== 'undefined' && ReactDOM.createPortal(
+        <ul
+          ref={menuRef}
+          className="font-color-menu"
+          role="listbox"
+          aria-label="Font color options"
+          style={{ top: menuPos.top, left: menuPos.left }}
+        >
+          {FONT_COLOR_OPTIONS.map((option) => (
+            <li key={option.value} role="option" aria-selected={false}>
+              <button
+                type="button"
+                className="font-color-menu-item"
+                onClick={() => { onChange(option.value); setOpen(false); }}
+              >
+                <ColorSwatch color={option.value} />
+                <span>{option.label}</span>
+              </button>
+            </li>
+          ))}
+        </ul>,
+        document.body
+      )}
+    </div>
+  );
+};
+
+export const HighlightColorDropdown = ({ onChange }: { onChange: (color: string) => void }) => {
+  const [open, setOpen] = React.useState(false);
+  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const menuRef = React.useRef<HTMLUListElement>(null);
+  const btnRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (!wrapperRef.current?.contains(target) && !menuRef.current?.contains(target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [open]);
+
+  const handleToggle = () => {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setMenuPos({ top: rect.bottom, left: rect.left });
+    }
+    setOpen((o) => !o);
+  };
+
+  return (
+    <div ref={wrapperRef} className="highlight-color-dropdown">
+      <button
+        ref={btnRef}
+        type="button"
+        className="highlight-color-btn"
+        onClick={handleToggle}
+        aria-label="Text highlight color"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        title="Text highlight color"
+      >
+        <span className="highlight-color-btn__glyph" aria-hidden="true">
+          <span className="highlight-color-btn__text">ab</span>
+          <span className="highlight-color-btn__bar" />
+        </span>
+        <ChevronDown size={12} />
+      </button>
+      {open && typeof document !== 'undefined' && ReactDOM.createPortal(
+        <ul
+          ref={menuRef}
+          className="highlight-color-menu"
+          role="listbox"
+          aria-label="Text highlight options"
+          style={{ top: menuPos.top, left: menuPos.left }}
+        >
+          {HIGHLIGHT_COLOR_OPTIONS.map((option) => (
+            <li key={option.value} role="option" aria-selected={false}>
+              <button
+                type="button"
+                className="highlight-color-menu-item"
+                onClick={() => { onChange(option.value); setOpen(false); }}
+              >
+                <ColorSwatch color={option.value} />
+                <span>{option.label}</span>
               </button>
             </li>
           ))}

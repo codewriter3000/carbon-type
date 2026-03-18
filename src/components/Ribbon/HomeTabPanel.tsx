@@ -13,8 +13,18 @@ import {
   TextIndentLess,
   TextClearFormat,
 } from '@carbon/icons-react';
-import { FONTS, SIZES, STYLES } from './ribbonConfig';
-import { CitationStyleDropdown, FormatButton, LineSpacingDropdown, RibbonChunk, RibbonDivider } from './RibbonControls';
+import { FONTS, SIZES, getStylePresets, toPreviewStyle } from './ribbonConfig';
+import {
+  ChangeCaseDropdown,
+  CitationStyleDropdown,
+  FontColorDropdown,
+  FormatButton,
+  HighlightColorDropdown,
+  LineSpacingDropdown,
+  RibbonChunk,
+  RibbonDivider,
+  TextEffectsDropdown,
+} from './RibbonControls';
 import { RibbonProps } from './types';
 
 type HomeTabPanelProps = Pick<
@@ -60,6 +70,32 @@ const HomeTabPanel = ({
   onCitationStyleChange,
 }: HomeTabPanelProps) => {
   const fmt = (cmd: string, val?: string) => () => onFormat(cmd, val);
+  const styles = getStylePresets(citationStyle);
+  const parsedFontSize = Number.parseInt(fontSize, 10);
+
+  const getClosestFontSizeIndex = (targetSize: number): number => {
+    let bestIndex = 0;
+    let bestDistance = Number.POSITIVE_INFINITY;
+
+    SIZES.forEach((size, index) => {
+      const current = Number.parseInt(size, 10);
+      const distance = Math.abs(current - targetSize);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestIndex = index;
+      }
+    });
+
+    return bestIndex;
+  };
+
+  const stepFontSize = (delta: -1 | 1) => {
+    const currentIndex = Number.isNaN(parsedFontSize)
+      ? 0
+      : getClosestFontSizeIndex(parsedFontSize);
+    const nextIndex = Math.max(0, Math.min(SIZES.length - 1, currentIndex + delta));
+    onFontSizeChange(SIZES[nextIndex]);
+  };
 
   return (
     <TabPanel>
@@ -132,6 +168,13 @@ const HomeTabPanel = ({
                 </option>
               ))}
             </select>
+            <FormatButton onClick={() => stepFontSize(1)} title="Increase Font Size">
+              <span className="format-btn__label">A+</span>
+            </FormatButton>
+            <FormatButton onClick={() => stepFontSize(-1)} title="Decrease Font Size">
+              <span className="format-btn__label">A-</span>
+            </FormatButton>
+            <ChangeCaseDropdown onChange={(caseType) => onFormat('changeCase', caseType)} />
           </div>
           <div className="ribbon-row">
             <FormatButton active={isBold} onClick={fmt('bold')} title="Bold">
@@ -152,9 +195,9 @@ const HomeTabPanel = ({
             <FormatButton active={isSuperscript} onClick={fmt('superscript')} title="Superscript">
               <span className="format-btn__label">X<sup>2</sup></span>
             </FormatButton>
-            <FormatButton onClick={fmt('hiliteColor', '#FFFF00')} title="Highlight">
-              <span className="format-btn__label format-btn__label--highlight">A</span>
-            </FormatButton>
+            <TextEffectsDropdown onChange={(effect) => onFormat('textEffect', effect)} />
+            <FontColorDropdown onChange={(color) => onFormat('foreColor', color)} />
+            <HighlightColorDropdown onChange={(color) => onFormat('hiliteColor', color)} />
             <Button
               className="items-center"
               kind="ghost"
@@ -268,7 +311,7 @@ const HomeTabPanel = ({
           }
         >
           <div className="ribbon-styles">
-            {STYLES.map((style) => (
+            {styles.map((style) => (
               <Button
                 key={style.label}
                 kind="ghost"
@@ -276,7 +319,7 @@ const HomeTabPanel = ({
                 className="ribbon-style-btn items-center"
                 onClick={() => onFormat(style.cmd, style.val)}
               >
-                <span style={style.previewStyle}>{style.label}</span>
+                <span style={toPreviewStyle(style.textStyle)}>{style.label}</span>
               </Button>
             ))}
           </div>

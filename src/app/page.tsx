@@ -6,8 +6,11 @@ import Ribbon from '@/components/Ribbon/Ribbon';
 import DocumentEditor from '@/components/DocumentEditor/DocumentEditor';
 import WordTitleBar from '@/components/WordTitleBar/WordTitleBar';
 import WordStatusBar from '@/components/WordStatusBar/WordStatusBar';
+import { DocumentTextStyle, getStylePresets } from '@/components/Ribbon/ribbonConfig';
 
 type TextAlignment = 'left' | 'center' | 'right' | 'justify';
+type CaseMode = 'sentence' | 'lowercase' | 'uppercase' | 'capitalize' | 'toggle';
+type TextEffectMode = 'none' | 'shadow' | 'outline' | 'smallCaps' | 'allCaps';
 
 const CITATION_CONFIGS = {
   'APA v7':  { fontFamily: 'Calibri',          fontSize: '11', lineSpacing: '2.0', alignment: 'left' as TextAlignment, firstLineIndent: '0.5in' },
@@ -85,6 +88,114 @@ export default function WordProcessor() {
     URL.revokeObjectURL(url);
   }, [documentName, fontFamily, fontSize, sanitizeForExport]);
 
+  const transformCase = useCallback((value: string, mode: CaseMode): string => {
+    switch (mode) {
+      case 'lowercase':
+        return value.toLowerCase();
+      case 'uppercase':
+        return value.toUpperCase();
+      case 'capitalize':
+        return value.toLowerCase().replace(/\b\p{L}/gu, (match) => match.toUpperCase());
+      case 'toggle':
+        return value
+          .split('')
+          .map((char) => {
+            const lower = char.toLowerCase();
+            const upper = char.toUpperCase();
+            if (char === lower && char !== upper) return upper;
+            if (char === upper && char !== lower) return lower;
+            return char;
+          })
+          .join('');
+      case 'sentence': {
+        const lower = value.toLowerCase();
+        let shouldCapitalize = true;
+        return lower.replace(/\p{L}|[.!?]/gu, (char) => {
+          if (/[.!?]/.test(char)) {
+            shouldCapitalize = true;
+            return char;
+          }
+          if (shouldCapitalize) {
+            shouldCapitalize = false;
+            return char.toUpperCase();
+          }
+          return char;
+        });
+      }
+      default:
+        return value;
+    }
+  }, []);
+
+  const applyTextEffect = useCallback((mode: TextEffectMode) => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    if (range.collapsed) return;
+
+    const fragment = range.extractContents();
+    const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT);
+    let textNode = walker.nextNode();
+    while (textNode) {
+      const currentNode = textNode as Text;
+      if ((currentNode.textContent ?? '').length > 0) {
+        const span = document.createElement('span');
+        span.textContent = currentNode.textContent;
+
+        if (mode === 'none') {
+          span.style.textShadow = 'none';
+          span.style.fontVariant = 'normal';
+          span.style.textTransform = 'none';
+          span.style.removeProperty('-webkit-text-stroke');
+        }
+
+        if (mode === 'shadow') {
+          span.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.35)';
+          span.style.fontVariant = 'normal';
+          span.style.textTransform = 'none';
+          span.style.removeProperty('-webkit-text-stroke');
+        }
+
+        if (mode === 'outline') {
+          span.style.textShadow = 'none';
+          span.style.fontVariant = 'normal';
+          span.style.textTransform = 'none';
+          span.style.setProperty('-webkit-text-stroke', '0.6px currentColor');
+        }
+
+        if (mode === 'smallCaps') {
+          span.style.textShadow = 'none';
+          span.style.fontVariant = 'small-caps';
+          span.style.textTransform = 'none';
+          span.style.removeProperty('-webkit-text-stroke');
+        }
+
+        if (mode === 'allCaps') {
+          span.style.textShadow = 'none';
+          span.style.fontVariant = 'normal';
+          span.style.textTransform = 'uppercase';
+          span.style.removeProperty('-webkit-text-stroke');
+        }
+
+        currentNode.replaceWith(span);
+      }
+      textNode = walker.nextNode();
+    }
+
+    const firstInserted = fragment.firstChild;
+    const lastInserted = fragment.lastChild;
+    range.insertNode(fragment);
+
+    if (firstInserted && lastInserted) {
+      const nextRange = document.createRange();
+      nextRange.setStartBefore(firstInserted);
+      nextRange.setEndAfter(lastInserted);
+      selection.removeAllRanges();
+      selection.addRange(nextRange);
+    }
+  }, []);
+
   // document.execCommand is the standard mechanism for formatting contentEditable
   // regions. While marked deprecated in the spec, all major browsers continue to
   // support it and there is no equivalent modern replacement for all commands.
@@ -92,7 +203,106 @@ export default function WordProcessor() {
     const el = editorRef.current;
     if (!el) return;
     el.focus();
+
+    if (command === 'changeCase') {
+      const mode = value as CaseMode | undefined;
+      if (!mode) return;
+
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return;
+
+      const range = selection.getRangeAt(0);
+      if (range.collapsed) return;
+
+      const fragment = range.extractContents();
+      const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT);
+      let textNode = walker.nextNode();
+      while (textNode) {
+        textNode.textContent = transformCase(textNode.textContent ?? '', mode);
+        textNode = walker.nextNode();
+      }
+
+      const firstInserted = fragment.firstChild;
+      const lastInserted = fragment.lastChild;
+      range.insertNode(fragment);
+
+      if (firstInserted && lastInserted) {
+        const nextRange = document.createRange();
+        nextRange.setStartBefore(firstInserted);
+        nextRange.setEndAfter(lastInserted);
+        selection.removeAllRanges();
+        selection.addRange(nextRange);
+      }
+
+      return;
+    }
+
+    if (command === 'textEffect') {
+      const mode = value as TextEffectMode | undefined;
+      if (!mode) return;
+      applyTextEffect(mode);
+      return;
+    }
+
     document.execCommand(command, false, value ?? undefined);
+
+    if (command === 'formatBlock' && value) {
+      const selectedStyle = getStylePresets(citationStyle).find((style) => style.val === value);
+      if (selectedStyle) {
+        const applyTextStyle = (block: HTMLElement, textStyle: DocumentTextStyle) => {
+          block.style.fontFamily = textStyle.fontFamily;
+          block.style.fontSize = `${textStyle.fontSizePt}pt`;
+          block.style.fontWeight = textStyle.fontWeight;
+          block.style.fontStyle = textStyle.fontStyle ?? 'normal';
+          block.style.color = textStyle.color;
+        };
+
+        const getBlockAncestor = (node: Node): HTMLElement | null => {
+          let current: Node | null = node;
+          while (current && current !== el) {
+            if (
+              current.nodeType === Node.ELEMENT_NODE &&
+              ['P', 'H1', 'H2', 'H3'].includes((current as Element).tagName)
+            ) {
+              return current as HTMLElement;
+            }
+            current = current.parentNode;
+          }
+          return null;
+        };
+
+        const selection = window.getSelection();
+        if (selection?.rangeCount) {
+          const range = selection.getRangeAt(0);
+          const blocks = new Set<HTMLElement>();
+          const startBlock = getBlockAncestor(range.startContainer);
+          const endBlock = getBlockAncestor(range.endContainer);
+          if (startBlock) blocks.add(startBlock);
+          if (endBlock) blocks.add(endBlock);
+
+          const ancestor = range.commonAncestorContainer;
+          const walkerRoot =
+            ancestor.nodeType === Node.ELEMENT_NODE
+              ? (ancestor as Element)
+              : (ancestor.parentElement ?? el);
+          const walker = document.createTreeWalker(walkerRoot, NodeFilter.SHOW_ELEMENT, {
+            acceptNode(node) {
+              const tag = (node as Element).tagName;
+              return ['P', 'H1', 'H2', 'H3'].includes(tag)
+                ? NodeFilter.FILTER_ACCEPT
+                : NodeFilter.FILTER_SKIP;
+            },
+          });
+
+          while (walker.nextNode()) {
+            const node = walker.currentNode as HTMLElement;
+            if (range.intersectsNode(node)) blocks.add(node);
+          }
+
+          blocks.forEach((block) => applyTextStyle(block, selectedStyle.textStyle));
+        }
+      }
+    }
 
     setIsBold(document.queryCommandState('bold'));
     setIsItalic(document.queryCommandState('italic'));
@@ -107,7 +317,7 @@ export default function WordProcessor() {
     else if (document.queryCommandState('justifyRight')) setAlignment('right');
     else if (document.queryCommandState('justifyFull')) setAlignment('justify');
     else setAlignment('left');
-  }, []);
+  }, [applyTextEffect, citationStyle, transformCase]);
 
   const handleFontFamilyChange = useCallback(
     (family: string) => {
@@ -272,6 +482,17 @@ export default function WordProcessor() {
     el.querySelectorAll<HTMLElement>('p, h1, h2, h3, h4, h5, h6, li').forEach((block) => {
       block.style.lineHeight = config.lineSpacing;
       block.style.textIndent = config.firstLineIndent;
+    });
+
+    // Keep existing heading and paragraph blocks aligned with the selected citation style.
+    getStylePresets(style).forEach((preset) => {
+      el.querySelectorAll<HTMLElement>(preset.val).forEach((block) => {
+        block.style.fontFamily = preset.textStyle.fontFamily;
+        block.style.fontSize = `${preset.textStyle.fontSizePt}pt`;
+        block.style.fontWeight = preset.textStyle.fontWeight;
+        block.style.fontStyle = preset.textStyle.fontStyle ?? 'normal';
+        block.style.color = preset.textStyle.color;
+      });
     });
     // Set font, size, and line-height on the editor root so new paragraphs
     // inherit them and so getComputedStyle at any cursor position returns the
