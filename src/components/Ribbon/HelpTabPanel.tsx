@@ -1,5 +1,5 @@
 import { Button, TabPanel } from '@carbon/react';
-import { RibbonChunk } from './RibbonControls';
+import { RibbonChunk } from './RibbonChunk';
 
 interface HelpTabPanelProps {
   onFeatureRequest: () => void;

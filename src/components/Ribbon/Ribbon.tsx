@@ -1,21 +1,12 @@
 'use client';
 
-import { Tabs, Tab, TabList, TabPanels, TabPanel, Button } from '@carbon/react';
-import {
-  Table,
-  Image,
-  Link,
-  TextIndentMore,
-  TextIndentLess,
-  SpellCheck,
-  ZoomIn,
-  ZoomOut,
-  Printer,
-} from '@carbon/icons-react';
+import { Tabs, Tab, TabList, TabPanels } from '@carbon/react';
 import HelpTabPanel from './HelpTabPanel';
 import HomeTabPanel from './HomeTabPanel';
-import { RibbonChunk, RibbonDivider, RibbonMobileContext, useMobileRibbon } from './RibbonControls';
+import RibbonSecondaryPanels from './RibbonSecondaryPanels';
+import { RibbonMobileContext, useMobileRibbon } from './RibbonChunk';
 import { RibbonProps } from './types';
+import styles from './Ribbon.module.scss';
 
 const Ribbon = ({
   onFormat,
@@ -47,7 +38,7 @@ const Ribbon = ({
 
   return (
     <RibbonMobileContext.Provider value={isMobile}>
-    <div className={`word-ribbon${isMobile ? ' word-ribbon--mobile' : ''}`}>
+    <div className={`${styles.ribbonRoot} word-ribbon${isMobile ? ' word-ribbon--mobile' : ''}`}>
       <Tabs>
         <TabList aria-label="Ribbon tabs">
           <Tab>Home</Tab>
@@ -86,171 +77,7 @@ const Ribbon = ({
             onBug={openHelpLink('https://github.com/codewriter3000/carbon-type/issues/new?template=bug_report.md')}
             onContribute={openHelpLink('https://github.com/codewriter3000/carbon-type')}
           />
-
-          <TabPanel>
-            <div className="ribbon-panel">
-              <RibbonChunk label="Tables">
-                <div className="ribbon-row">
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    renderIcon={Table}
-                    iconDescription="Insert Table"
-                  >
-                    Table
-                  </Button>
-                </div>
-              </RibbonChunk>
-              <RibbonDivider />
-              <RibbonChunk label="Illustrations">
-                <div className="ribbon-row">
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    renderIcon={Image}
-                    iconDescription="Picture"
-                  >
-                    Picture
-                  </Button>
-                </div>
-              </RibbonChunk>
-              <RibbonDivider />
-              <RibbonChunk label="Links">
-                <div className="ribbon-row">
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    renderIcon={Link}
-                    iconDescription="Hyperlink"
-                  >
-                    Hyperlink
-                  </Button>
-                </div>
-              </RibbonChunk>
-              <RibbonDivider />
-              <RibbonChunk label="Print">
-                <div className="ribbon-row">
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    renderIcon={Printer}
-                    iconDescription="Print"
-                    onClick={onPrint}
-                  >
-                    Print
-                  </Button>
-                </div>
-              </RibbonChunk>
-            </div>
-          </TabPanel>
-
-          <TabPanel>
-            <div className="ribbon-panel">
-              <RibbonChunk label="Page Setup">
-                <div className="ribbon-row">
-                  <Button kind="ghost" size="sm">
-                    Margins
-                  </Button>
-                  <Button kind="ghost" size="sm">
-                    Orientation
-                  </Button>
-                  <Button kind="ghost" size="sm">
-                    Size
-                  </Button>
-                </div>
-              </RibbonChunk>
-              <RibbonDivider />
-              <RibbonChunk label="Paragraph">
-                <div className="ribbon-row">
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextIndentMore}
-                    iconDescription="Increase Indent"
-                    tooltipPosition="bottom"
-                    onClick={() => onFormat('indent')}
-                  />
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextIndentLess}
-                    iconDescription="Decrease Indent"
-                    tooltipPosition="bottom"
-                    onClick={() => onFormat('outdent')}
-                  />
-                </div>
-              </RibbonChunk>
-            </div>
-          </TabPanel>
-
-          <TabPanel>
-            <div className="ribbon-panel">
-              <RibbonChunk label="Table of Contents">
-                <div className="ribbon-row">
-                  <Button kind="ghost" size="sm">
-                    Table of Contents
-                  </Button>
-                </div>
-              </RibbonChunk>
-              <RibbonDivider />
-              <RibbonChunk label="Footnotes">
-                <div className="ribbon-row">
-                  <Button kind="ghost" size="sm">
-                    Insert Footnote
-                  </Button>
-                </div>
-              </RibbonChunk>
-            </div>
-          </TabPanel>
-
-          <TabPanel>
-            <div className="ribbon-panel">
-              <RibbonChunk label="Proofing">
-                <div className="ribbon-row">
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    renderIcon={SpellCheck}
-                    iconDescription="Spelling &amp; Grammar"
-                  >
-                    Spelling &amp; Grammar
-                  </Button>
-                </div>
-              </RibbonChunk>
-            </div>
-          </TabPanel>
-
-          <TabPanel>
-            <div className="ribbon-panel">
-              <RibbonChunk label="Zoom">
-                <div className="ribbon-row">
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={ZoomOut}
-                    iconDescription="Zoom Out"
-                    tooltipPosition="bottom"
-                    onClick={() => onZoom(-10)}
-                  />
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={ZoomIn}
-                    iconDescription="Zoom In"
-                    tooltipPosition="bottom"
-                    onClick={() => onZoom(10)}
-                  />
-                  <Button kind="ghost" size="sm" onClick={() => onZoom(0)}>
-                    100%
-                  </Button>
-                </div>
-              </RibbonChunk>
-            </div>
-          </TabPanel>
+          <RibbonSecondaryPanels onFormat={onFormat} onPrint={onPrint} onZoom={onZoom} />
         </TabPanels>
       </Tabs>
     </div>

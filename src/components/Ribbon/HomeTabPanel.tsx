@@ -21,10 +21,9 @@ import {
   FormatButton,
   HighlightColorDropdown,
   LineSpacingDropdown,
-  RibbonChunk,
-  RibbonDivider,
   TextEffectsDropdown,
 } from './RibbonControls';
+import { RibbonChunk, RibbonDivider } from './RibbonChunk';
 import { RibbonProps } from './types';
 
 type HomeTabPanelProps = Pick<

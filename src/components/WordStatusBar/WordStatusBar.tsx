@@ -10,6 +10,8 @@ const WordStatusBar = ({ wordCount, zoom }: WordStatusBarProps) => (
     <span>Words: {wordCount}</span>
     <span className="word-status-bar__divider">|</span>
     <span>Zoom: {zoom}%</span>
+    <span className="word-status-bar__divider">|</span>
+    <span>Please note that this app is unstable</span>
   </div>
 );
 

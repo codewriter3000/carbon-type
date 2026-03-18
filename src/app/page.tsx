@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { asBlob } from 'html-docx-js/dist/html-docx';
-import Ribbon from '@/components/Ribbon/Ribbon';
+import Ribbon from '@/components/Ribbon';
 import DocumentEditor from '@/components/DocumentEditor/DocumentEditor';
 import WordTitleBar from '@/components/WordTitleBar/WordTitleBar';
 import WordStatusBar from '@/components/WordStatusBar/WordStatusBar';
@@ -331,23 +331,45 @@ export default function WordProcessor() {
     (size: string) => {
       if (!size) return;
       setFontSize(size);
+      pendingFontSizeRef.current = null;
       const el = editorRef.current;
       if (!el) return;
       el.focus();
 
       const sel = window.getSelection();
-      if (!sel || !sel.rangeCount) return;
+      if (!sel) return;
 
-      // Collapsed cursor: don't touch the DOM at all — that would inflate the line
-      // height and potentially move the cursor. Instead, store the size as pending;
-      // the beforeinput handler will wrap the first typed character in a span.
-      if (sel.isCollapsed) {
-        pendingFontSizeRef.current = size;
-        // Re-assert setFontSize so it wins over any selectionchange-triggered reset
-        // that fires synchronously inside el.focus() above (React 19 batches both).
+      let range: Range;
+      if (!sel.rangeCount || !el.contains(sel.anchorNode)) {
+        range = document.createRange();
+        range.selectNodeContents(el);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } else {
+        range = sel.getRangeAt(0);
+      }
+
+      // Collapsed cursor: insert a styled empty span at the caret and place the
+      // caret inside it so subsequent typing inherits this exact size.
+      if (range.collapsed) {
+        const span = document.createElement('span');
+        span.style.fontSize = `${size}pt`;
+        span.setAttribute('data-pending-font-size', '1');
+        range.insertNode(span);
+
+        const caretRange = document.createRange();
+        caretRange.setStart(span, 0);
+        caretRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(caretRange);
+
         setFontSize(size);
         return;
       }
+
+      // Range formatting is applied immediately, so no pending caret override is needed.
+      pendingFontSizeRef.current = null;
 
       // Non-collapsed selection: use execCommand('fontSize', '7') as a structural
       // marker — the browser handles all cross-element selection edge cases —
@@ -541,21 +563,72 @@ export default function WordProcessor() {
       return values;
     };
 
-    // Read the computed font at a single element (collapsed cursor).
+    const getDeepestLastNode = (node: Node | null): Node | null => {
+      if (!node) return null;
+      let current: Node = node;
+      while (current.lastChild) current = current.lastChild;
+      return current;
+    };
+
+    const getPreviousNode = (node: Node, root: Node): Node | null => {
+      let current: Node | null = node;
+      while (current && current !== root) {
+        if (current.previousSibling) return current.previousSibling;
+        current = current.parentNode;
+      }
+      return null;
+    };
+
+    const resolveCaretProbeElement = (sel: Selection, root: HTMLElement): Element | null => {
+      const anchor = sel.anchorNode;
+      if (!anchor) return null;
+
+      if (anchor.nodeType === Node.TEXT_NODE) {
+        if (sel.anchorOffset > 0) {
+          return (anchor as Text).parentElement;
+        }
+
+        const prev = getPreviousNode(anchor, root);
+        const probe = getDeepestLastNode(prev);
+        return probe
+          ? probe.nodeType === Node.TEXT_NODE
+            ? (probe as Text).parentElement
+            : (probe as Element)
+          : (anchor as Text).parentElement;
+      }
+
+      const anchorEl = anchor as Element;
+      if (sel.anchorOffset > 0) {
+        const priorChild = anchor.childNodes[sel.anchorOffset - 1] ?? null;
+        const probe = getDeepestLastNode(priorChild);
+        if (probe) {
+          return probe.nodeType === Node.TEXT_NODE
+            ? (probe as Text).parentElement
+            : (probe as Element);
+        }
+      }
+
+      const prev = getPreviousNode(anchor, root);
+      const probe = getDeepestLastNode(prev);
+      if (probe) {
+        return probe.nodeType === Node.TEXT_NODE
+          ? (probe as Text).parentElement
+          : (probe as Element);
+      }
+
+      return anchorEl;
+    };
+
+    // Read the computed font at the caret position (collapsed cursor).
     const getComputedAtCaret = (prop: 'fontFamily' | 'fontSize'): string => {
-      const raw = document.queryCommandValue(
-        prop === 'fontFamily' ? 'fontName' : 'fontSize'
-      );
-      // For fontName Chrome returns the actual name; for fontSize it returns 1-7 legacy values.
-      // Use computed style on the anchor node's parent instead for accuracy.
       const sel = window.getSelection();
-      if (!sel || !sel.anchorNode) return '';
-      const parent =
-        sel.anchorNode.nodeType === Node.TEXT_NODE
-          ? sel.anchorNode.parentElement
-          : (sel.anchorNode as Element);
-      if (!parent) return raw;
-      const computed = window.getComputedStyle(parent)[prop];
+      const root = editorRef.current;
+      if (!sel || !root || !sel.anchorNode) return '';
+
+      const probeElement = resolveCaretProbeElement(sel, root);
+      if (!probeElement) return '';
+
+      const computed = window.getComputedStyle(probeElement)[prop];
       return prop === 'fontFamily'
         ? computed.split(',')[0].trim().replace(/^["']|["']$/g, '')
         : pxToPt(computed);
@@ -568,14 +641,13 @@ export default function WordProcessor() {
       if (!sel || !sel.rangeCount) return;
       if (!el.contains(sel.anchorNode)) return;
 
-      // Cursor moved — any pending font-size no longer applies to future typing.
-      pendingFontSizeRef.current = null;
-
       const range = sel.getRangeAt(0);
 
       if (range.collapsed) {
         setFontFamily(getComputedAtCaret('fontFamily'));
-        setFontSize(getComputedAtCaret('fontSize'));
+        // If user picked a size for upcoming typing at a collapsed caret,
+        // keep that value visible instead of snapping back to surrounding text.
+        setFontSize(pendingFontSizeRef.current ?? getComputedAtCaret('fontSize'));
         setIsBold(document.queryCommandState('bold'));
         setIsItalic(document.queryCommandState('italic'));
         setIsUnderline(document.queryCommandState('underline'));
@@ -591,7 +663,7 @@ export default function WordProcessor() {
       setFontFamily(fonts.size === 1 ? [...fonts][0] : '');
 
       const sizes = getComputedValuesInRange(range, 'fontSize');
-      setFontSize(sizes.size === 1 ? [...sizes][0] : '');
+      setFontSize(pendingFontSizeRef.current ?? (sizes.size === 1 ? [...sizes][0] : ''));
       setIsBold(document.queryCommandState('bold'));
       setIsItalic(document.queryCommandState('italic'));
       setIsUnderline(document.queryCommandState('underline'));
@@ -614,11 +686,39 @@ export default function WordProcessor() {
       if (e.inputType !== 'insertText' || !pendingFontSizeRef.current || !e.data) return;
       e.preventDefault();
       const size = pendingFontSizeRef.current;
-      pendingFontSizeRef.current = null;
       document.execCommand('insertHTML', false, `<span style="font-size:${size}pt">${e.data}</span>`);
     };
+
+    const clearPendingSize = () => {
+      pendingFontSizeRef.current = null;
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      // Navigation keys indicate explicit caret move; stop forcing a pending size.
+      if (
+        e.key === 'ArrowLeft' ||
+        e.key === 'ArrowRight' ||
+        e.key === 'ArrowUp' ||
+        e.key === 'ArrowDown' ||
+        e.key === 'Home' ||
+        e.key === 'End' ||
+        e.key === 'PageUp' ||
+        e.key === 'PageDown'
+      ) {
+        clearPendingSize();
+      }
+    };
+
     el.addEventListener('beforeinput', onBeforeInput);
-    return () => el.removeEventListener('beforeinput', onBeforeInput);
+    el.addEventListener('mouseup', clearPendingSize);
+    el.addEventListener('blur', clearPendingSize);
+    el.addEventListener('keydown', onKeyDown);
+    return () => {
+      el.removeEventListener('beforeinput', onBeforeInput);
+      el.removeEventListener('mouseup', clearPendingSize);
+      el.removeEventListener('blur', clearPendingSize);
+      el.removeEventListener('keydown', onKeyDown);
+    };
   }, []);
 
   const handlePrint = useCallback(() => {
