@@ -1,419 +1,21 @@
 'use client';
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { Tabs, Tab, TabList, TabPanels, TabPanel, Button } from '@carbon/react';
 import {
-  TextAlignLeft,
-  TextAlignCenter,
-  TextAlignRight,
-  TextAlignJustify,
-  ListBulleted,
-  ListNumbered,
-  Cut,
-  Copy,
-  Paste,
   Table,
   Image,
   Link,
   TextIndentMore,
   TextIndentLess,
-  TextClearFormat,
-  TextLineSpacing,
   SpellCheck,
   ZoomIn,
   ZoomOut,
   Printer,
-  ChevronDown,
 } from '@carbon/icons-react';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface RibbonProps {
-  onFormat: (command: string, value?: string) => void;
-  fontSize: string;
-  fontFamily: string;
-  onFontSizeChange: (size: string) => void;
-  onFontFamilyChange: (family: string) => void;
-  isBold: boolean;
-  isItalic: boolean;
-  isUnderline: boolean;
-  isStrikethrough: boolean;
-  isSubscript: boolean;
-  isSuperscript: boolean;
-  isUnorderedList: boolean;
-  isOrderedList: boolean;
-  alignment: string;
-  onPrint: () => void;
-  onZoom: (delta: number) => void;
-  lineSpacing: string;
-  onLineSpacingChange: (spacing: string) => void;
-  citationStyle: string;
-  onCitationStyleChange: (style: string) => void;
-}
-
-// ─── Mobile context / hook ────────────────────────────────────────────────────
-
-const RibbonMobileContext = React.createContext(false);
-
-const useMobileRibbon = () => {
-  const [isMobile, setIsMobile] = React.useState(false);
-  React.useEffect(() => {
-    const mq = window.matchMedia('(max-width: 815px)');
-    setIsMobile(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-  return isMobile;
-};
-
-// ─── Helper sub-components ────────────────────────────────────────────────────
-
-const RibbonChunk = ({
-  label,
-  children,
-  launcher,
-}: {
-  label: string;
-  children: React.ReactNode;
-  launcher?: React.ReactNode;
-}) => {
-  const isMobile = React.useContext(RibbonMobileContext);
-  const [open, setOpen] = React.useState(false);
-  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
-  const btnRef = React.useRef<HTMLButtonElement>(null);
-  const menuRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    if (!open) return;
-    const handleOutside = (e: MouseEvent) => {
-      const t = e.target as Node;
-      if (!btnRef.current?.contains(t) && !menuRef.current?.contains(t)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleOutside);
-    return () => document.removeEventListener('mousedown', handleOutside);
-  }, [open]);
-
-  if (isMobile) {
-    const handleToggle = () => {
-      if (!open && btnRef.current) {
-        const rect = btnRef.current.getBoundingClientRect();
-        const MARGIN = 8;
-        // MIN_WIDTH matches the CSS min-width of .ribbon-chunk-mobile-dropdown.
-        // Using it as a lower-bound estimate lets us pre-clamp right overflow
-        // synchronously, without needing a post-render measurement.
-        const MIN_WIDTH = 180;
-        const vw = window.innerWidth;
-        const top = rect.bottom + 2;
-        let left = rect.left;
-        if (left + MIN_WIDTH + MARGIN > vw) left = vw - MIN_WIDTH - MARGIN;
-        if (left < MARGIN) left = MARGIN;
-        setMenuPos({ top, left });
-      }
-      setOpen((o) => !o);
-    };
-
-    return (
-      <>
-        <button
-          ref={btnRef}
-          type="button"
-          className={`ribbon-chunk-mobile-btn${open ? ' ribbon-chunk-mobile-btn--open' : ''}`}
-          onClick={handleToggle}
-          aria-haspopup="true"
-          aria-expanded={open}
-        >
-          {label}
-          <ChevronDown size={12} />
-        </button>
-        {open && typeof document !== 'undefined' && ReactDOM.createPortal(
-          <div
-            ref={menuRef}
-            className="ribbon-chunk-mobile-dropdown"
-            style={{
-              top: menuPos.top,
-              left: menuPos.left,
-              // Prevent bottom overflow via CSS — we know the top value so
-              // we can cap the height without needing a post-render measurement.
-              maxHeight: `calc(100vh - ${menuPos.top}px - 8px)`,
-            }}
-          >
-            {children}
-            {launcher && <div className="ribbon-chunk-mobile-dropdown__launcher">{launcher}</div>}
-          </div>,
-          document.body
-        )}
-      </>
-    );
-  }
-
-  return (
-    <div className="ribbon-chunk">
-      <div className="ribbon-chunk__controls">{children}</div>
-      <div className="ribbon-chunk__label">
-        <span>{label}</span>
-        {launcher && <span className="ribbon-chunk__launcher">{launcher}</span>}
-      </div>
-    </div>
-  );
-};
-
-const RibbonDivider = () => <div className="ribbon-divider" />;
-
-// ─── Format Button (styled-text toggle button) ────────────────────────────────
-
-const FormatButton = ({
-  active = false,
-  onClick,
-  title,
-  children,
-}: {
-  active?: boolean;
-  onClick: () => void;
-  title: string;
-  children: React.ReactNode;
-}) => (
-  <button
-    type="button"
-    className={`format-btn${active ? ' format-btn--active' : ''}`}
-    onClick={onClick}
-    title={title}
-    aria-label={title}
-    aria-pressed={active}
-  >
-    {children}
-  </button>
-);
-
-// ─── Dialog Launcher Icon ────────────────────────────────────────────────────
-
-const DialogLauncherIcon = () => (
-  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-    <rect x="0.75" y="0.75" width="8.5" height="8.5" rx="1" stroke="currentColor" strokeWidth="1" />
-    <path
-      d="M3.5 3.5 L6.5 6.5 M6.5 6.5 L4.5 6.5 M6.5 6.5 L6.5 4.5"
-      stroke="currentColor"
-      strokeWidth="1"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-// ─── Citation Style Dropdown ─────────────────────────────────────────────────
-
-const CITATION_STYLE_OPTIONS = ['APA v7', 'APA v6', 'MLA', 'Chicago'] as const;
-
-interface CitationStyleDropdownProps {
-  value: string;
-  onChange: (style: string) => void;
-}
-
-const CitationStyleDropdown = ({ value, onChange }: CitationStyleDropdownProps) => {
-  const [open, setOpen] = React.useState(false);
-  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
-  const wrapperRef = React.useRef<HTMLDivElement>(null);
-  const menuRef = React.useRef<HTMLUListElement>(null);
-  const btnRef = React.useRef<HTMLButtonElement>(null);
-
-  React.useEffect(() => {
-    if (!open) return;
-    const handleOutsideClick = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (!wrapperRef.current?.contains(target) && !menuRef.current?.contains(target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, [open]);
-
-  const handleToggle = () => {
-    if (!open && btnRef.current) {
-      const rect = btnRef.current.getBoundingClientRect();
-      setMenuPos({ top: rect.bottom + 2, left: rect.left });
-    }
-    setOpen((o) => !o);
-  };
-
-  return (
-    <div ref={wrapperRef} className="citation-style-launcher">
-      <button
-        ref={btnRef}
-        type="button"
-        className="citation-style-launcher-btn"
-        onClick={handleToggle}
-        aria-label="Citation and document style"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        title="Citation &amp; Document Style"
-      >
-        <DialogLauncherIcon />
-      </button>
-      {open && typeof document !== 'undefined' && ReactDOM.createPortal(
-        <ul
-          ref={menuRef}
-          className="citation-style-menu"
-          role="listbox"
-          aria-label="Citation style options"
-          style={{ top: menuPos.top, left: menuPos.left }}
-        >
-          {CITATION_STYLE_OPTIONS.map((s) => (
-            <li key={s} role="option" aria-selected={s === value}>
-              <button
-                type="button"
-                className={`citation-style-menu-item${s === value ? ' citation-style-menu-item--active' : ''}`}
-                onClick={() => { onChange(s); setOpen(false); }}
-              >
-                {s}
-              </button>
-            </li>
-          ))}
-        </ul>,
-        document.body
-      )}
-    </div>
-  );
-};
-
-// ─── Ribbon ───────────────────────────────────────────────────────────────────
-
-const FONTS = [
-  'Calibri',
-  'Arial',
-  'Times New Roman',
-  'Georgia',
-  'Courier New',
-  'Verdana',
-  'Tahoma',
-  'Impact',
-];
-const SIZES = ['8', '9', '10', '11', '12', '14', '16', '18', '20', '24', '28', '32', '36', '48', '72'];
-
-const STYLES: { label: string; cmd: string; val: string; previewStyle: React.CSSProperties }[] = [
-  {
-    label: 'Normal',
-    cmd: 'formatBlock',
-    val: 'p',
-    previewStyle: {
-      fontFamily: 'Calibri, sans-serif',
-      fontSize: '11px',
-      fontWeight: '400',
-      color: '#161616',
-    },
-  },
-  {
-    label: 'Heading 1',
-    cmd: 'formatBlock',
-    val: 'h1',
-    previewStyle: {
-      fontFamily: "'Calibri Light', Calibri, sans-serif",
-      fontSize: '15px',
-      fontWeight: '700',
-      color: '#2e74b5',
-    },
-  },
-  {
-    label: 'Heading 2',
-    cmd: 'formatBlock',
-    val: 'h2',
-    previewStyle: {
-      fontFamily: "'Calibri Light', Calibri, sans-serif",
-      fontSize: '13px',
-      fontWeight: '700',
-      color: '#2e74b5',
-    },
-  },
-  {
-    label: 'Heading 3',
-    cmd: 'formatBlock',
-    val: 'h3',
-    previewStyle: {
-      fontFamily: "'Calibri Light', Calibri, sans-serif",
-      fontSize: '12px',
-      fontWeight: '700',
-      fontStyle: 'italic',
-      color: '#1f3864',
-    },
-  },
-];
-
-const LINE_SPACINGS = ['1.0', '1.15', '1.5', '2.0', '2.5', '3.0'];
-
-interface LineSpacingDropdownProps {
-  value: string;
-  onChange: (spacing: string) => void;
-}
-
-const LineSpacingDropdown = ({ value, onChange }: LineSpacingDropdownProps) => {
-  const [open, setOpen] = React.useState(false);
-  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
-  const wrapperRef = React.useRef<HTMLDivElement>(null);
-  const menuRef = React.useRef<HTMLUListElement>(null);
-  const btnRef = React.useRef<HTMLButtonElement>(null);
-
-  React.useEffect(() => {
-    if (!open) return;
-    const handleOutsideClick = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (!wrapperRef.current?.contains(target) && !menuRef.current?.contains(target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, [open]);
-
-  const handleToggle = () => {
-    if (!open && btnRef.current) {
-      const rect = btnRef.current.getBoundingClientRect();
-      setMenuPos({ top: rect.bottom, left: rect.left });
-    }
-    setOpen((o) => !o);
-  };
-
-  return (
-    <div ref={wrapperRef} className="line-spacing-dropdown">
-      <button
-        ref={btnRef}
-        type="button"
-        className="line-spacing-btn"
-        onClick={handleToggle}
-        aria-label="Line Spacing"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-      >
-        <TextLineSpacing size={16} />
-        <ChevronDown size={12} />
-      </button>
-      {open && typeof document !== 'undefined' && ReactDOM.createPortal(
-        <ul
-          ref={menuRef}
-          className="line-spacing-menu"
-          role="listbox"
-          aria-label="Line spacing options"
-          style={{ top: menuPos.top, left: menuPos.left }}
-        >
-          {LINE_SPACINGS.map((s) => (
-            <li key={s} role="option" aria-selected={s === value}>
-              <button
-                type="button"
-                className={`line-spacing-menu-item${s === value ? ' line-spacing-menu-item--active' : ''}`}
-                onClick={() => { onChange(s); setOpen(false); }}
-              >
-                {s}
-              </button>
-            </li>
-          ))}
-        </ul>,
-        document.body
-      )}
-    </div>
-  );
-};
+import HelpTabPanel from './HelpTabPanel';
+import HomeTabPanel from './HomeTabPanel';
+import { RibbonChunk, RibbonDivider, RibbonMobileContext, useMobileRibbon } from './RibbonControls';
+import { RibbonProps } from './types';
 
 const Ribbon = ({
   onFormat,
@@ -437,18 +39,10 @@ const Ribbon = ({
   citationStyle,
   onCitationStyleChange,
 }: RibbonProps) => {
-  const fmt = (cmd: string, val?: string) => () => onFormat(cmd, val);
   const isMobile = useMobileRibbon();
-  const NEW_ISSUE_URL = 'https://github.com/codewriter3000/carbon-type/issues/new';
-  const HELP_LINKS = {
-    featureRequest: NEW_ISSUE_URL,
-    bug: NEW_ISSUE_URL,
-    vulnerability:
-      'mailto:alex@amicharski.com?subject=Security%20Vulnerability%3A%20Carbon%20Type',
-    contribute: 'https://github.com/codewriter3000/carbon-type',
-  } as const;
-  const navigateTo = (destination: keyof typeof HELP_LINKS) => () => {
-    window.location.assign(HELP_LINKS[destination]);
+
+  const openHelpLink = (url: string) => () => {
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -458,289 +52,41 @@ const Ribbon = ({
         <TabList aria-label="Ribbon tabs">
           <Tab>Home</Tab>
           <Tab>Help</Tab>
-          <Tab>Insert</Tab>
+          {/* <Tab>Insert</Tab>
           <Tab>Page Layout</Tab>
           <Tab>References</Tab>
           <Tab>Review</Tab>
-          <Tab>View</Tab>
+          <Tab>View</Tab>*/}
         </TabList>
 
         <TabPanels>
-          {/* ── Home ─────────────────────────────────────────────────────── */}
-          <TabPanel>
-            <div className="ribbon-panel">
-              {/* Clipboard */}
-              <RibbonChunk label="Clipboard">
-                <div className="ribbon-clipboard">
-                  <div className="ribbon-clipboard__paste">
-                    <Button className="items-center"
-                      kind="ghost"
-                      size="sm"
-                      hasIconOnly
-                      renderIcon={Paste}
-                      iconDescription="Paste"
-                      tooltipPosition="bottom"
-                      onClick={fmt('paste')}
-                    >
-                    </Button>
-                  </div>
-                  <div className="ribbon-clipboard__small">
-                    <Button className="items-center"
-                      kind="ghost"
-                      size="sm"
-                      hasIconOnly
-                      renderIcon={Cut}
-                      iconDescription="Cut"
-                      tooltipPosition="bottom"
-                      onClick={fmt('cut')}
-                    />
-                    <Button className="items-center"
-                      kind="ghost"
-                      size="sm"
-                      hasIconOnly
-                      renderIcon={Copy}
-                      iconDescription="Copy"
-                      tooltipPosition="top"
-                      onClick={fmt('copy')}
-                    />
-                  </div>
-                </div>
-              </RibbonChunk>
-              <RibbonDivider />
+          <HomeTabPanel
+            onFormat={onFormat}
+            fontSize={fontSize}
+            fontFamily={fontFamily}
+            onFontSizeChange={onFontSizeChange}
+            onFontFamilyChange={onFontFamilyChange}
+            isBold={isBold}
+            isItalic={isItalic}
+            isUnderline={isUnderline}
+            isStrikethrough={isStrikethrough}
+            isSubscript={isSubscript}
+            isSuperscript={isSuperscript}
+            isUnorderedList={isUnorderedList}
+            isOrderedList={isOrderedList}
+            alignment={alignment}
+            lineSpacing={lineSpacing}
+            onLineSpacingChange={onLineSpacingChange}
+            citationStyle={citationStyle}
+            onCitationStyleChange={onCitationStyleChange}
+          />
 
-              {/* Font */}
-              <RibbonChunk label="Font">
-                <div className="ribbon-row">
-                  <select
-                    className="ribbon-select"
-                    value={fontFamily}
-                    onChange={(e) => onFontFamilyChange(e.target.value)}
-                    aria-label="Font family"
-                  >
-                    <option value="" />
-                    {FONTS.map((f) => (
-                      <option key={f} value={f}>
-                        {f}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    className="ribbon-select ribbon-select--size"
-                    value={fontSize}
-                    onChange={(e) => onFontSizeChange(e.target.value)}
-                    aria-label="Font size"
-                  >
-                    <option value="" />
-                    {SIZES.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="ribbon-row">
-                  <FormatButton active={isBold} onClick={fmt('bold')} title="Bold">
-                    <span className="format-btn__label format-btn__label--bold">B</span>
-                  </FormatButton>
-                  <FormatButton active={isItalic} onClick={fmt('italic')} title="Italic">
-                    <span className="format-btn__label format-btn__label--italic">I</span>
-                  </FormatButton>
-                  <FormatButton active={isUnderline} onClick={fmt('underline')} title="Underline">
-                    <span className="format-btn__label format-btn__label--underline">U</span>
-                  </FormatButton>
-                  <FormatButton active={isStrikethrough} onClick={fmt('strikeThrough')} title="Strikethrough">
-                    <span className="format-btn__label format-btn__label--strikethrough">S</span>
-                  </FormatButton>
-                  <FormatButton active={isSubscript} onClick={fmt('subscript')} title="Subscript">
-                    <span className="format-btn__label">X<sub>2</sub></span>
-                  </FormatButton>
-                  <FormatButton active={isSuperscript} onClick={fmt('superscript')} title="Superscript">
-                    <span className="format-btn__label">X<sup>2</sup></span>
-                  </FormatButton>
-                  <FormatButton onClick={fmt('hiliteColor', '#FFFF00')} title="Highlight">
-                    <span className="format-btn__label format-btn__label--highlight">A</span>
-                  </FormatButton>
-                  <Button className="items-center"
-                    kind="ghost"
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextClearFormat}
-                    iconDescription="Clear Formatting"
-                    tooltipPosition="bottom"
-                    onClick={fmt('removeFormat')}
-                  />
-                </div>
-              </RibbonChunk>
-              <RibbonDivider />
+          <HelpTabPanel
+            onFeatureRequest={openHelpLink('https://github.com/codewriter3000/carbon-type/issues/new?template=feature_request.md')}
+            onBug={openHelpLink('https://github.com/codewriter3000/carbon-type/issues/new?template=bug_report.md')}
+            onContribute={openHelpLink('https://github.com/codewriter3000/carbon-type')}
+          />
 
-              {/* Paragraph */}
-              <RibbonChunk label="Paragraph">
-                <div className="ribbon-row">
-                  <Button className="items-center"
-                    kind={isUnorderedList ? 'primary' : 'ghost'}
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={ListBulleted}
-                    iconDescription="Bulleted List"
-                    tooltipPosition="bottom"
-                    onClick={fmt('insertUnorderedList')}
-                  />
-                  <Button className="items-center"
-                    kind={isOrderedList ? 'primary' : 'ghost'}
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={ListNumbered}
-                    iconDescription="Numbered List"
-                    tooltipPosition="bottom"
-                    onClick={fmt('insertOrderedList')}
-                  />
-                  <Button className="items-center"
-                    kind="ghost"
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextIndentLess}
-                    iconDescription="Decrease Indent"
-                    tooltipPosition="bottom"
-                    onClick={fmt('outdent')}
-                  />
-                  <Button className="items-center"
-                    kind="ghost"
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextIndentMore}
-                    iconDescription="Increase Indent"
-                    tooltipPosition="bottom"
-                    onClick={fmt('indent')}
-                  />
-                  <LineSpacingDropdown value={lineSpacing} onChange={onLineSpacingChange} />
-                </div>
-                <div className="ribbon-row">
-                  <Button className="items-center"
-                    kind={alignment === 'left' ? 'primary' : 'ghost'}
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextAlignLeft}
-                    iconDescription="Align Left"
-                    tooltipPosition="top"
-                    onClick={fmt('justifyLeft')}
-                  />
-                  <Button className="items-center"
-                    kind={alignment === 'center' ? 'primary' : 'ghost'}
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextAlignCenter}
-                    iconDescription="Center"
-                    tooltipPosition="top"
-                    onClick={fmt('justifyCenter')}
-                  />
-                  <Button className="items-center"
-                    kind={alignment === 'right' ? 'primary' : 'ghost'}
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextAlignRight}
-                    iconDescription="Align Right"
-                    tooltipPosition="top"
-                    onClick={fmt('justifyRight')}
-                  />
-                  <Button className="items-center"
-                    kind={alignment === 'justify' ? 'primary' : 'ghost'}
-                    size="sm"
-                    hasIconOnly
-                    renderIcon={TextAlignJustify}
-                    iconDescription="Justify"
-                    tooltipPosition="top"
-                    onClick={fmt('justifyFull')}
-                  />
-                </div>
-              </RibbonChunk>
-              <RibbonDivider />
-
-              {/* Styles */}
-              <RibbonChunk
-                label="Styles"
-                launcher={
-                  <CitationStyleDropdown
-                    value={citationStyle}
-                    onChange={onCitationStyleChange}
-                  />
-                }
-              >
-                <div className="ribbon-styles">
-                  {STYLES.map((style) => (
-                    <Button
-                      key={style.label}
-                      kind="ghost"
-                      size="sm"
-                      className="ribbon-style-btn items-center"
-                      onClick={() => onFormat(style.cmd, style.val)}
-                    >
-                      <span style={style.previewStyle}>{style.label}</span>
-                    </Button>
-                  ))}
-                </div>
-              </RibbonChunk>
-              <RibbonDivider />
-
-              {/* Editing */}
-              {/* <RibbonChunk label="Editing">
-                <div className="ribbon-row">
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    renderIcon={Search}
-                    iconDescription="Find"
-                    onClick={fmt('find')}
-                  >
-                    Find
-                  </Button>
-                </div>
-                <div className="ribbon-row">
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    renderIcon={Undo}
-                    iconDescription="Undo"
-                    onClick={fmt('undo')}
-                  >
-                    Undo
-                  </Button>
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    renderIcon={Redo}
-                    iconDescription="Redo"
-                    onClick={fmt('redo')}
-                  >
-                    Redo
-                  </Button>
-                </div>
-              </RibbonChunk> */}
-            </div>
-          </TabPanel>
-
-          {/* ── Help ─────────────────────────────────────────────────────── */}
-          <TabPanel>
-            <div className="ribbon-panel">
-              <RibbonChunk label="Support">
-                <div className="ribbon-row">
-                  <Button kind="ghost" size="sm" onClick={navigateTo('featureRequest')}>
-                    Feature Request
-                  </Button>
-                  <Button kind="ghost" size="sm" onClick={navigateTo('bug')}>
-                    Bug
-                  </Button>
-                  <Button kind="ghost" size="sm" onClick={navigateTo('vulnerability')}>
-                    Vulnerability
-                  </Button>
-                  <Button kind="ghost" size="sm" onClick={navigateTo('contribute')}>
-                    Contribute
-                  </Button>
-                </div>
-              </RibbonChunk>
-            </div>
-          </TabPanel>
-
-          {/* ── Insert ───────────────────────────────────────────────────── */}
           <TabPanel>
             <div className="ribbon-panel">
               <RibbonChunk label="Tables">
@@ -798,7 +144,6 @@ const Ribbon = ({
             </div>
           </TabPanel>
 
-          {/* ── Page Layout ──────────────────────────────────────────────── */}
           <TabPanel>
             <div className="ribbon-panel">
               <RibbonChunk label="Page Setup">
@@ -824,7 +169,7 @@ const Ribbon = ({
                     renderIcon={TextIndentMore}
                     iconDescription="Increase Indent"
                     tooltipPosition="bottom"
-                    onClick={fmt('indent')}
+                    onClick={() => onFormat('indent')}
                   />
                   <Button
                     kind="ghost"
@@ -833,14 +178,13 @@ const Ribbon = ({
                     renderIcon={TextIndentLess}
                     iconDescription="Decrease Indent"
                     tooltipPosition="bottom"
-                    onClick={fmt('outdent')}
+                    onClick={() => onFormat('outdent')}
                   />
                 </div>
               </RibbonChunk>
             </div>
           </TabPanel>
 
-          {/* ── References ───────────────────────────────────────────────── */}
           <TabPanel>
             <div className="ribbon-panel">
               <RibbonChunk label="Table of Contents">
@@ -861,7 +205,6 @@ const Ribbon = ({
             </div>
           </TabPanel>
 
-          {/* ── Review ───────────────────────────────────────────────────── */}
           <TabPanel>
             <div className="ribbon-panel">
               <RibbonChunk label="Proofing">
@@ -879,7 +222,6 @@ const Ribbon = ({
             </div>
           </TabPanel>
 
-          {/* ── View ─────────────────────────────────────────────────────── */}
           <TabPanel>
             <div className="ribbon-panel">
               <RibbonChunk label="Zoom">
