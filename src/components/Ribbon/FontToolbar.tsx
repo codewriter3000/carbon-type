@@ -99,7 +99,7 @@ const FontToolbar = ({
                 hasIconOnly
                 renderIcon={DocumentAdd}
                 iconDescription="New"
-                tooltipPosition="bottom"
+
                 onClick={onNew}
               />
               <Button
@@ -109,7 +109,7 @@ const FontToolbar = ({
                 hasIconOnly
                 renderIcon={FolderOpen}
                 iconDescription="Open"
-                tooltipPosition="bottom"
+
                 onClick={onOpen}
               />
               <Button
@@ -119,7 +119,7 @@ const FontToolbar = ({
                 hasIconOnly
                 renderIcon={DocumentDownload}
                 iconDescription="Download"
-                tooltipPosition="bottom"
+
                 onClick={onDownload}
               />
               <span className="font-toolbar__divider" aria-hidden="true" />
@@ -133,7 +133,7 @@ const FontToolbar = ({
             hasIconOnly
             renderIcon={Undo}
             iconDescription="Undo"
-            tooltipPosition="bottom"
+
             onClick={fmt('undo')}
           />
           <Button
@@ -143,7 +143,7 @@ const FontToolbar = ({
             hasIconOnly
             renderIcon={Redo}
             iconDescription="Redo"
-            tooltipPosition="bottom"
+
             onClick={fmt('redo')}
           />
 
@@ -159,7 +159,7 @@ const FontToolbar = ({
                   hasIconOnly
                   renderIcon={Paste}
                   iconDescription="Paste"
-                  tooltipPosition="bottom"
+
                   onClick={fmt('paste')}
                 />
                 <Button
@@ -169,7 +169,7 @@ const FontToolbar = ({
                   hasIconOnly
                   renderIcon={Cut}
                   iconDescription="Cut"
-                  tooltipPosition="bottom"
+
                   onClick={fmt('cut')}
                 />
                 <Button
@@ -179,7 +179,7 @@ const FontToolbar = ({
                   hasIconOnly
                   renderIcon={Copy}
                   iconDescription="Copy"
-                  tooltipPosition="top"
+
                   onClick={fmt('copy')}
                 />
               </div>
@@ -252,7 +252,7 @@ const FontToolbar = ({
             hasIconOnly
             renderIcon={TextClearFormat}
             iconDescription="Clear Formatting"
-            tooltipPosition="bottom"
+
             onClick={fmt('removeFormat')}
           />
         </div>

@@ -33,7 +33,7 @@ const StyleTabPanel = ({
             hasIconOnly
             renderIcon={Add}
             iconDescription="Create New Style"
-            tooltipPosition="bottom"
+
             className="ribbon-style-new-icon-btn"
             onClick={onStartNewStyle}
           />

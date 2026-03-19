@@ -48,7 +48,7 @@ const ParagraphToolbar = ({
                 hasIconOnly
                 renderIcon={ListBulleted}
                 iconDescription="Bulleted List"
-                tooltipPosition="bottom"
+
                 onClick={fmt('insertUnorderedList')}
               />
               <Button
@@ -58,7 +58,7 @@ const ParagraphToolbar = ({
                 hasIconOnly
                 renderIcon={ListNumbered}
                 iconDescription="Numbered List"
-                tooltipPosition="bottom"
+
                 onClick={fmt('insertOrderedList')}
               />
             </>
@@ -70,7 +70,7 @@ const ParagraphToolbar = ({
             hasIconOnly
             renderIcon={TextIndentLess}
             iconDescription="Decrease Indent"
-            tooltipPosition="bottom"
+
             onClick={fmt('outdent')}
           />
           <Button
@@ -80,7 +80,7 @@ const ParagraphToolbar = ({
             hasIconOnly
             renderIcon={TextIndentMore}
             iconDescription="Increase Indent"
-            tooltipPosition="bottom"
+
             onClick={fmt('indent')}
           />
           <LineSpacingDropdown value={lineSpacing} onChange={onLineSpacingChange} />
@@ -94,7 +94,7 @@ const ParagraphToolbar = ({
             hasIconOnly
             renderIcon={TextAlignLeft}
             iconDescription="Align Left"
-            tooltipPosition="top"
+
             onClick={fmt('justifyLeft')}
           />
           <Button
@@ -104,7 +104,7 @@ const ParagraphToolbar = ({
             hasIconOnly
             renderIcon={TextAlignCenter}
             iconDescription="Center"
-            tooltipPosition="top"
+
             onClick={fmt('justifyCenter')}
           />
           <Button
@@ -114,7 +114,7 @@ const ParagraphToolbar = ({
             hasIconOnly
             renderIcon={TextAlignRight}
             iconDescription="Align Right"
-            tooltipPosition="top"
+
             onClick={fmt('justifyRight')}
           />
           <Button
@@ -124,7 +124,7 @@ const ParagraphToolbar = ({
             hasIconOnly
             renderIcon={TextAlignJustify}
             iconDescription="Justify"
-            tooltipPosition="top"
+
             onClick={fmt('justifyFull')}
           />
         </div>

@@ -27,7 +27,7 @@ const FileTabPanel = ({
             size="sm"
             renderIcon={DocumentAdd}
             iconDescription="New"
-            tooltipposition="bottom"
+
             onClick={onNew}
           >
             New
@@ -38,7 +38,7 @@ const FileTabPanel = ({
             size="sm"
             renderIcon={FolderOpen}
             iconDescription="Open"
-            tooltipposition="bottom"
+
             onClick={onOpen}
           >
             Open
@@ -49,7 +49,7 @@ const FileTabPanel = ({
             size="sm"
             renderIcon={DocumentDownload}
             iconDescription="Download"
-            tooltipposition="bottom"
+
             onClick={onDownload}
           >
             Download
@@ -65,7 +65,7 @@ const FileTabPanel = ({
             size="sm"
             renderIcon={SettingsAdjust}
             iconDescription="Page Setup"
-            tooltipposition="bottom"
+
             onClick={onPageSetup}
           >
             Page Setup
@@ -76,7 +76,7 @@ const FileTabPanel = ({
             size="sm"
             renderIcon={Printer}
             iconDescription="Print"
-            tooltipposition="bottom"
+
             onClick={onPrint}
           >
             Print

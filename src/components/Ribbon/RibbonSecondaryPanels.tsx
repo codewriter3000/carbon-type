@@ -102,7 +102,7 @@ const LayoutTabPanel = ({ onFormat }: Pick<RibbonSecondaryPanelsProps, 'onFormat
             hasIconOnly
             renderIcon={TextIndentMore}
             iconDescription="Increase Indent"
-            tooltipposition="bottom"
+
             onClick={() => onFormat('indent')}
           />
           <Button
@@ -111,7 +111,7 @@ const LayoutTabPanel = ({ onFormat }: Pick<RibbonSecondaryPanelsProps, 'onFormat
             hasIconOnly
             renderIcon={TextIndentLess}
             iconDescription="Decrease Indent"
-            tooltipposition="bottom"
+
             onClick={() => onFormat('outdent')}
           />
         </div>
@@ -172,7 +172,7 @@ const ViewTabPanel = ({ onZoom }: Pick<RibbonSecondaryPanelsProps, 'onZoom'>) =>
             hasIconOnly
             renderIcon={ZoomOut}
             iconDescription="Zoom Out"
-            tooltipposition="bottom"
+
             onClick={() => onZoom(-10)}
           />
           <Button
@@ -181,7 +181,7 @@ const ViewTabPanel = ({ onZoom }: Pick<RibbonSecondaryPanelsProps, 'onZoom'>) =>
             hasIconOnly
             renderIcon={ZoomIn}
             iconDescription="Zoom In"
-            tooltipposition="bottom"
+
             onClick={() => onZoom(10)}
           />
           <Button kind="ghost" size="sm" onClick={() => onZoom(0)}>
