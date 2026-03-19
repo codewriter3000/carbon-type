@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, forwardRef } from 'react';
+import styles from './DocumentEditor.module.scss';
 
 const AUTOSAVE_KEY = 'carbon-type-autosave';
 const AUTOSAVE_DEBOUNCE_MS = 1000;
@@ -35,7 +36,7 @@ const isBlockNode = (node: Node): boolean =>
   node.nodeType === Node.ELEMENT_NODE && BLOCK_LEVEL_TAGS.has((node as Element).tagName);
 
 const ensureRootContainer = (el: HTMLDivElement) => {
-  // Guarantee at least one child container under .document-content.
+  // Guarantee at least one child container under the editable surface.
   if (!el.firstChild) {
     const line = document.createElement('div');
     line.appendChild(document.createElement('br'));
@@ -189,7 +190,7 @@ const DocumentEditor = forwardRef<HTMLDivElement, DocumentEditorProps>(
     return (
       <div
         ref={ref}
-        className="document-content"
+        className={styles.content}
         contentEditable
         suppressContentEditableWarning
         onInput={handleInput}

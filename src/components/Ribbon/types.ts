@@ -1,5 +1,9 @@
 export interface RibbonProps {
   onFormat: (command: string, value?: string) => void;
+  onNew?: () => void;
+  onOpen?: () => void;
+  onDownload?: () => void;
+  onPageSetup?: () => void;
   fontSize: string;
   fontFamily: string;
   onFontSizeChange: (size: string) => void;

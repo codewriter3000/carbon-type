@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { ChevronDown } from '@carbon/icons-react';
 
 export const RibbonMobileContext = React.createContext(false);
@@ -32,7 +31,6 @@ export const RibbonChunk = ({
 }: RibbonChunkProps) => {
   const isMobile = React.useContext(RibbonMobileContext);
   const [open, setOpen] = React.useState(false);
-  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
   const btnRef = React.useRef<HTMLButtonElement>(null);
   const menuRef = React.useRef<HTMLDivElement>(null);
 
@@ -49,16 +47,10 @@ export const RibbonChunk = ({
   }, [open]);
 
   if (isMobile) {
-    const handleToggle = () => {
-      if (!open && btnRef.current) {
-        const rect = btnRef.current.getBoundingClientRect();
-        setMenuPos({ top: rect.bottom + 2, left: Math.max(8, rect.left) });
-      }
-      setOpen((o) => !o);
-    };
+    const handleToggle = () => setOpen((o) => !o);
 
     return (
-      <>
+      <div className="ribbon-chunk-mobile">
         <button
           ref={btnRef}
           type="button"
@@ -70,22 +62,16 @@ export const RibbonChunk = ({
           {label}
           <ChevronDown size={12} />
         </button>
-        {open && typeof document !== 'undefined' && ReactDOM.createPortal(
+        {open && (
           <div
             ref={menuRef}
             className="ribbon-chunk-mobile-dropdown"
-            style={{
-              top: menuPos.top,
-              left: menuPos.left,
-              maxHeight: `calc(100vh - ${menuPos.top}px - 8px)`,
-            }}
           >
             {children}
             {launcher && <div className="ribbon-chunk-mobile-dropdown__launcher">{launcher}</div>}
-          </div>,
-          document.body,
+          </div>
         )}
-      </>
+      </div>
     );
   }
 
