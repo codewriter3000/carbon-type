@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, forwardRef } from 'react';
+import styles from './DocumentEditor.module.scss';
 
 const AUTOSAVE_KEY = 'carbon-type-autosave';
 const AUTOSAVE_DEBOUNCE_MS = 1000;
@@ -13,6 +14,55 @@ interface DocumentEditorProps {
 }
 
 const INITIAL_CONTENT = '';
+const BLOCK_LEVEL_TAGS = new Set([
+  'DIV',
+  'P',
+  'H1',
+  'H2',
+  'H3',
+  'H4',
+  'H5',
+  'H6',
+  'UL',
+  'OL',
+  'LI',
+  'BLOCKQUOTE',
+  'PRE',
+  'TABLE',
+  'HR',
+]);
+
+const isBlockNode = (node: Node): boolean =>
+  node.nodeType === Node.ELEMENT_NODE && BLOCK_LEVEL_TAGS.has((node as Element).tagName);
+
+const ensureRootContainer = (el: HTMLDivElement) => {
+  // Guarantee at least one child container under the editable surface.
+  if (!el.firstChild) {
+    const line = document.createElement('div');
+    line.appendChild(document.createElement('br'));
+    el.appendChild(line);
+    return;
+  }
+
+  // If content is inline/text at the root level, keep it in one inline parent
+  // to avoid creating a new block line on each keystroke.
+  const hasBlockChild = Array.from(el.childNodes).some((child) => isBlockNode(child));
+  if (!hasBlockChild) {
+    const isSingleInlineWrapper =
+      el.childNodes.length === 1 &&
+      el.firstChild?.nodeType === Node.ELEMENT_NODE &&
+      (el.firstChild as Element).tagName === 'SPAN';
+
+    if (!isSingleInlineWrapper) {
+      const wrapper = document.createElement('span');
+      wrapper.setAttribute('data-root-inline', '1');
+      while (el.firstChild) {
+        wrapper.appendChild(el.firstChild);
+      }
+      el.appendChild(wrapper);
+    }
+  }
+};
 
 const DocumentEditor = forwardRef<HTMLDivElement, DocumentEditorProps>(
   ({ onWordCountChange, onAutosave, onAutosaveStart, autosaveEnabled = true }, ref) => {
@@ -26,11 +76,13 @@ const DocumentEditor = forwardRef<HTMLDivElement, DocumentEditorProps>(
       const saved = localStorage.getItem(AUTOSAVE_KEY);
       if (saved) {
         el.innerHTML = saved;
+        ensureRootContainer(el);
         const text = el.innerText;
         const words = text.trim() ? text.trim().split(/\s+/).length : 0;
         onWordCountChange?.(words);
       } else if (!el.innerHTML) {
         el.innerHTML = INITIAL_CONTENT;
+        ensureRootContainer(el);
       }
 
       // Flush any pending save and persist the current content on unmount.
@@ -138,7 +190,7 @@ const DocumentEditor = forwardRef<HTMLDivElement, DocumentEditorProps>(
     return (
       <div
         ref={ref}
-        className="document-content"
+        className={styles.content}
         contentEditable
         suppressContentEditableWarning
         onInput={handleInput}

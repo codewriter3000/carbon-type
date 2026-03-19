@@ -1,9 +1,12 @@
-.document-canvas {
+.canvas {
   flex: 1;
   overflow-y: auto;
-  background: #808080;
+  overflow-x: hidden;
+  background: #6f6f6f;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   padding: 24px 24px;
 
   @media (max-width: 815px) {
@@ -11,13 +14,36 @@
   }
 }
 
-.document-page {
+.canvasStack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 24px;
+
+  @media (max-width: 815px) {
+    padding-top: 0;
+  }
+}
+
+.toolbarSlot {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 6;
+}
+
+.page {
   background: #fff;
   width: min(816px, 100%);
   min-height: 1056px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
   padding: clamp(16px, 6vw, 96px);
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 
   @media (max-width: 815px) {
     width: 100%;
@@ -26,7 +52,7 @@
   }
 }
 
-.document-content {
+.content {
   min-height: 864px;
   outline: none;
   line-height: 1.5;
@@ -90,15 +116,15 @@
   li {
     margin: 0 0 4px;
   }
+
+  &:focus,
+  &:focus-visible {
+    outline: none !important;
+    box-shadow: none;
+  }
 }
 
-.document-content:focus,
-.document-content:focus-visible {
-  outline: none !important;
-  box-shadow: none;
-}
-
-.document-page:focus-within {
+.page:focus-within {
   outline: none;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
 }

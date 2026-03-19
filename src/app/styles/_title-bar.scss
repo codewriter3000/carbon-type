@@ -1,9 +1,8 @@
 .word-title-bar {
   display: flex;
   align-items: center;
-  background: #2b5797;
-  color: #fff;
-  height: 34px;
+  background: #525252;
+  height: 40px;
   padding: 0 4px;
   flex-shrink: 0;
   gap: 4px;
@@ -34,7 +33,7 @@
   text-align: center;
   font-size: 13px;
   font-weight: 400;
-  color: #fff;
+  color: #edf5ff;
   pointer-events: none;
   user-select: none;
 }
@@ -68,6 +67,10 @@
   // Override Carbon toggle colours for the dark title bar
   .cds--toggle__switch {
     margin: 0;
+  }
+
+  .cds--toggle__switch--checked {
+    background-color: #0f62fe;
   }
 
   .cds--toggle__label {
