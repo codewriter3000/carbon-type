@@ -3,10 +3,9 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { asBlob } from 'html-docx-js/dist/html-docx';
 import Ribbon from '@/components/Ribbon';
-import DocumentEditor from '@/components/DocumentEditor/DocumentEditor';
-import WordTitleBar from '@/components/WordTitleBar/WordTitleBar';
-import WordStatusBar from '@/components/WordStatusBar/WordStatusBar';
-import { DocumentTextStyle, getStylePresets } from '@/components/Ribbon/ribbonConfig';
+import DocumentEditor, { DocumentSurface } from '@/components/DocumentEditor';
+import TitleBar from '@/components/TitleBar/TitleBar';
+import { DocumentTextStyle, getStylePresets, StylePreset } from '@/components/Ribbon/ribbonConfig';
 
 type TextAlignment = 'left' | 'center' | 'right' | 'justify';
 type CaseMode = 'sentence' | 'lowercase' | 'uppercase' | 'capitalize' | 'toggle';
@@ -204,6 +203,74 @@ export default function WordProcessor() {
     if (!el) return;
     el.focus();
 
+    const applyStylePresetToSelection = (preset: StylePreset) => {
+      const applyTextStyle = (block: HTMLElement, textStyle: DocumentTextStyle) => {
+        block.style.fontFamily = textStyle.fontFamily;
+        block.style.fontSize = `${textStyle.fontSizePt}pt`;
+        block.style.fontWeight = textStyle.fontWeight;
+        block.style.fontStyle = textStyle.fontStyle ?? 'normal';
+        block.style.color = textStyle.color;
+      };
+
+      const getBlockAncestor = (node: Node): HTMLElement | null => {
+        let current: Node | null = node;
+        while (current && current !== el) {
+          if (
+            current.nodeType === Node.ELEMENT_NODE &&
+            ['P', 'H1', 'H2', 'H3'].includes((current as Element).tagName)
+          ) {
+            return current as HTMLElement;
+          }
+          current = current.parentNode;
+        }
+        return null;
+      };
+
+      const selection = window.getSelection();
+      if (!selection?.rangeCount) {
+        return;
+      }
+
+      const range = selection.getRangeAt(0);
+      const blocks = new Set<HTMLElement>();
+      const startBlock = getBlockAncestor(range.startContainer);
+      const endBlock = getBlockAncestor(range.endContainer);
+      if (startBlock) blocks.add(startBlock);
+      if (endBlock) blocks.add(endBlock);
+
+      const ancestor = range.commonAncestorContainer;
+      const walkerRoot =
+        ancestor.nodeType === Node.ELEMENT_NODE
+          ? (ancestor as Element)
+          : (ancestor.parentElement ?? el);
+      const walker = document.createTreeWalker(walkerRoot, NodeFilter.SHOW_ELEMENT, {
+        acceptNode(node) {
+          const tag = (node as Element).tagName;
+          return ['P', 'H1', 'H2', 'H3'].includes(tag)
+            ? NodeFilter.FILTER_ACCEPT
+            : NodeFilter.FILTER_SKIP;
+        },
+      });
+
+      while (walker.nextNode()) {
+        const node = walker.currentNode as HTMLElement;
+        if (range.intersectsNode(node)) blocks.add(node);
+      }
+
+      blocks.forEach((block) => applyTextStyle(block, preset.textStyle));
+    };
+
+    if (command === 'applyStylePreset' && value) {
+      try {
+        const preset = JSON.parse(value) as StylePreset;
+        document.execCommand('formatBlock', false, preset.val);
+        applyStylePresetToSelection(preset);
+      } catch {
+        // Ignore malformed style payloads and keep editor stable.
+      }
+      return;
+    }
+
     if (command === 'changeCase') {
       const mode = value as CaseMode | undefined;
       if (!mode) return;
@@ -249,58 +316,7 @@ export default function WordProcessor() {
     if (command === 'formatBlock' && value) {
       const selectedStyle = getStylePresets(citationStyle).find((style) => style.val === value);
       if (selectedStyle) {
-        const applyTextStyle = (block: HTMLElement, textStyle: DocumentTextStyle) => {
-          block.style.fontFamily = textStyle.fontFamily;
-          block.style.fontSize = `${textStyle.fontSizePt}pt`;
-          block.style.fontWeight = textStyle.fontWeight;
-          block.style.fontStyle = textStyle.fontStyle ?? 'normal';
-          block.style.color = textStyle.color;
-        };
-
-        const getBlockAncestor = (node: Node): HTMLElement | null => {
-          let current: Node | null = node;
-          while (current && current !== el) {
-            if (
-              current.nodeType === Node.ELEMENT_NODE &&
-              ['P', 'H1', 'H2', 'H3'].includes((current as Element).tagName)
-            ) {
-              return current as HTMLElement;
-            }
-            current = current.parentNode;
-          }
-          return null;
-        };
-
-        const selection = window.getSelection();
-        if (selection?.rangeCount) {
-          const range = selection.getRangeAt(0);
-          const blocks = new Set<HTMLElement>();
-          const startBlock = getBlockAncestor(range.startContainer);
-          const endBlock = getBlockAncestor(range.endContainer);
-          if (startBlock) blocks.add(startBlock);
-          if (endBlock) blocks.add(endBlock);
-
-          const ancestor = range.commonAncestorContainer;
-          const walkerRoot =
-            ancestor.nodeType === Node.ELEMENT_NODE
-              ? (ancestor as Element)
-              : (ancestor.parentElement ?? el);
-          const walker = document.createTreeWalker(walkerRoot, NodeFilter.SHOW_ELEMENT, {
-            acceptNode(node) {
-              const tag = (node as Element).tagName;
-              return ['P', 'H1', 'H2', 'H3'].includes(tag)
-                ? NodeFilter.FILTER_ACCEPT
-                : NodeFilter.FILTER_SKIP;
-            },
-          });
-
-          while (walker.nextNode()) {
-            const node = walker.currentNode as HTMLElement;
-            if (range.intersectsNode(node)) blocks.add(node);
-          }
-
-          blocks.forEach((block) => applyTextStyle(block, selectedStyle.textStyle));
-        }
+        applyStylePresetToSelection(selectedStyle);
       }
     }
 
@@ -742,7 +758,7 @@ export default function WordProcessor() {
 
   return (
     <div className="word-processor">
-      <WordTitleBar
+      <TitleBar
         documentName={documentName}
         autosaveEnabled={autosaveEnabled}
         autosaveStatus={autosaveStatus}
@@ -753,59 +769,57 @@ export default function WordProcessor() {
             setAutosaveStatus('');
           }
         }}
-        onSave={handleSave}
-        onUndo={() => handleFormat('undo')}
-        onRedo={() => handleFormat('redo')}
-        onPrint={handlePrint}
       />
 
-      {/* Ribbon */}
-      <Ribbon
-        onFormat={handleFormat}
-        fontSize={fontSize}
-        fontFamily={fontFamily}
-        onFontSizeChange={handleFontSizeChange}
-        onFontFamilyChange={handleFontFamilyChange}
-        isBold={isBold}
-        isItalic={isItalic}
-        isUnderline={isUnderline}
-        isStrikethrough={isStrikethrough}
-        isSubscript={isSubscript}
-        isSuperscript={isSuperscript}
-        isUnorderedList={isUnorderedList}
-        isOrderedList={isOrderedList}
-        alignment={alignment}
-        onPrint={handlePrint}
-        onZoom={handleZoom}
-        lineSpacing={lineSpacing}
-        onLineSpacingChange={handleLineSpacingChange}
-        citationStyle={citationStyle}
-        onCitationStyleChange={handleCitationStyleChange}
-      />
-
-      {/* Document Canvas — grey background, scrollable */}
-      <div className="document-canvas">
-        {/* Document Page — white paper, scaled for zoom */}
-        <div
-          className="document-page"
-          style={{
-            transform: `scale(${scaleFactor})`,
-            transformOrigin: 'top center',
-            // Compensate layout space so the canvas scrollbar reflects true content height
-            marginBottom: `${(scaleFactor - 1) * 1056}px`,
-          }}
-        >
-          <DocumentEditor
-            ref={editorRef}
-            onWordCountChange={setWordCount}
-            onAutosave={handleAutosave}
-            onAutosaveStart={handleAutosaveStart}
-            autosaveEnabled={autosaveEnabled}
+      <DocumentSurface
+        scaleFactor={scaleFactor}
+        toolbar={(
+          <Ribbon
+            onFormat={handleFormat}
+            onNew={() => {
+              const el = editorRef.current;
+              if (!el) return;
+              el.innerHTML = '<div><br></div>';
+              el.focus();
+              setWordCount(0);
+            }}
+            onOpen={() => {
+              window.alert('Open is not implemented yet.');
+            }}
+            onDownload={handleSave}
+            onPageSetup={() => {
+              window.alert('Page Setup is not implemented yet.');
+            }}
+            fontSize={fontSize}
+            fontFamily={fontFamily}
+            onFontSizeChange={handleFontSizeChange}
+            onFontFamilyChange={handleFontFamilyChange}
+            isBold={isBold}
+            isItalic={isItalic}
+            isUnderline={isUnderline}
+            isStrikethrough={isStrikethrough}
+            isSubscript={isSubscript}
+            isSuperscript={isSuperscript}
+            isUnorderedList={isUnorderedList}
+            isOrderedList={isOrderedList}
+            alignment={alignment}
+            onPrint={handlePrint}
+            onZoom={handleZoom}
+            lineSpacing={lineSpacing}
+            onLineSpacingChange={handleLineSpacingChange}
+            citationStyle={citationStyle}
+            onCitationStyleChange={handleCitationStyleChange}
           />
-        </div>
-      </div>
-
-      <WordStatusBar wordCount={wordCount} zoom={zoom} />
+        )}
+      >
+        <DocumentEditor
+          ref={editorRef}
+          onWordCountChange={setWordCount}
+          onAutosave={handleAutosave}
+          onAutosaveStart={handleAutosaveStart}
+          autosaveEnabled={autosaveEnabled}
+        />
+      </DocumentSurface>
     </div>
   );
 }

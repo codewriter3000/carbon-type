@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { ChevronDown, TextLineSpacing } from '@carbon/icons-react';
 import {
   CASE_OPTIONS,
@@ -48,10 +47,8 @@ const DialogLauncherIcon = () => (
 
 export const CitationStyleDropdown = ({ value, onChange }: { value: string; onChange: (style: string) => void }) => {
   const [open, setOpen] = React.useState(false);
-  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const menuRef = React.useRef<HTMLUListElement>(null);
-  const btnRef = React.useRef<HTMLButtonElement>(null);
 
   React.useEffect(() => {
     if (!open) return;
@@ -65,18 +62,11 @@ export const CitationStyleDropdown = ({ value, onChange }: { value: string; onCh
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, [open]);
 
-  const handleToggle = () => {
-    if (!open && btnRef.current) {
-      const rect = btnRef.current.getBoundingClientRect();
-      setMenuPos({ top: rect.bottom + 2, left: rect.left });
-    }
-    setOpen((o) => !o);
-  };
+  const handleToggle = () => setOpen((o) => !o);
 
   return (
     <div ref={wrapperRef} className="citation-style-launcher">
       <button
-        ref={btnRef}
         type="button"
         className="citation-style-launcher-btn"
         onClick={handleToggle}
@@ -87,13 +77,12 @@ export const CitationStyleDropdown = ({ value, onChange }: { value: string; onCh
       >
         <DialogLauncherIcon />
       </button>
-      {open && typeof document !== 'undefined' && ReactDOM.createPortal(
+      {open && (
         <ul
           ref={menuRef}
           className="citation-style-menu"
           role="listbox"
           aria-label="Citation style options"
-          style={{ top: menuPos.top, left: menuPos.left }}
         >
           {CITATION_STYLE_OPTIONS.map((s) => (
             <li key={s} role="option" aria-selected={s === value}>
@@ -106,8 +95,7 @@ export const CitationStyleDropdown = ({ value, onChange }: { value: string; onCh
               </button>
             </li>
           ))}
-        </ul>,
-        document.body
+        </ul>
       )}
     </div>
   );
@@ -115,10 +103,8 @@ export const CitationStyleDropdown = ({ value, onChange }: { value: string; onCh
 
 export const LineSpacingDropdown = ({ value, onChange }: { value: string; onChange: (spacing: string) => void }) => {
   const [open, setOpen] = React.useState(false);
-  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const menuRef = React.useRef<HTMLUListElement>(null);
-  const btnRef = React.useRef<HTMLButtonElement>(null);
 
   React.useEffect(() => {
     if (!open) return;
@@ -132,18 +118,11 @@ export const LineSpacingDropdown = ({ value, onChange }: { value: string; onChan
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, [open]);
 
-  const handleToggle = () => {
-    if (!open && btnRef.current) {
-      const rect = btnRef.current.getBoundingClientRect();
-      setMenuPos({ top: rect.bottom, left: rect.left });
-    }
-    setOpen((o) => !o);
-  };
+  const handleToggle = () => setOpen((o) => !o);
 
   return (
     <div ref={wrapperRef} className="line-spacing-dropdown">
       <button
-        ref={btnRef}
         type="button"
         className="line-spacing-btn"
         onClick={handleToggle}
@@ -154,13 +133,12 @@ export const LineSpacingDropdown = ({ value, onChange }: { value: string; onChan
         <TextLineSpacing size={16} />
         <ChevronDown size={12} />
       </button>
-      {open && typeof document !== 'undefined' && ReactDOM.createPortal(
+      {open && (
         <ul
           ref={menuRef}
           className="line-spacing-menu"
           role="listbox"
           aria-label="Line spacing options"
-          style={{ top: menuPos.top, left: menuPos.left }}
         >
           {LINE_SPACINGS.map((s) => (
             <li key={s} role="option" aria-selected={s === value}>
@@ -173,8 +151,7 @@ export const LineSpacingDropdown = ({ value, onChange }: { value: string; onChan
               </button>
             </li>
           ))}
-        </ul>,
-        document.body
+        </ul>
       )}
     </div>
   );
@@ -182,10 +159,8 @@ export const LineSpacingDropdown = ({ value, onChange }: { value: string; onChan
 
 export const ChangeCaseDropdown = ({ onChange }: { onChange: (mode: string) => void }) => {
   const [open, setOpen] = React.useState(false);
-  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const menuRef = React.useRef<HTMLUListElement>(null);
-  const btnRef = React.useRef<HTMLButtonElement>(null);
 
   React.useEffect(() => {
     if (!open) return;
@@ -199,18 +174,11 @@ export const ChangeCaseDropdown = ({ onChange }: { onChange: (mode: string) => v
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, [open]);
 
-  const handleToggle = () => {
-    if (!open && btnRef.current) {
-      const rect = btnRef.current.getBoundingClientRect();
-      setMenuPos({ top: rect.bottom, left: rect.left });
-    }
-    setOpen((o) => !o);
-  };
+  const handleToggle = () => setOpen((o) => !o);
 
   return (
     <div ref={wrapperRef} className="change-case-dropdown">
       <button
-        ref={btnRef}
         type="button"
         className="change-case-btn"
         onClick={handleToggle}
@@ -222,13 +190,12 @@ export const ChangeCaseDropdown = ({ onChange }: { onChange: (mode: string) => v
         <span className="change-case-btn__text">Aa</span>
         <ChevronDown size={12} />
       </button>
-      {open && typeof document !== 'undefined' && ReactDOM.createPortal(
+      {open && (
         <ul
           ref={menuRef}
           className="change-case-menu"
           role="listbox"
           aria-label="Change case options"
-          style={{ top: menuPos.top, left: menuPos.left }}
         >
           {CASE_OPTIONS.map((option) => (
             <li key={option.value} role="option" aria-selected={false}>
@@ -241,8 +208,7 @@ export const ChangeCaseDropdown = ({ onChange }: { onChange: (mode: string) => v
               </button>
             </li>
           ))}
-        </ul>,
-        document.body
+        </ul>
       )}
     </div>
   );
@@ -250,10 +216,8 @@ export const ChangeCaseDropdown = ({ onChange }: { onChange: (mode: string) => v
 
 export const TextEffectsDropdown = ({ onChange }: { onChange: (effect: string) => void }) => {
   const [open, setOpen] = React.useState(false);
-  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const menuRef = React.useRef<HTMLUListElement>(null);
-  const btnRef = React.useRef<HTMLButtonElement>(null);
 
   React.useEffect(() => {
     if (!open) return;
@@ -267,18 +231,11 @@ export const TextEffectsDropdown = ({ onChange }: { onChange: (effect: string) =
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, [open]);
 
-  const handleToggle = () => {
-    if (!open && btnRef.current) {
-      const rect = btnRef.current.getBoundingClientRect();
-      setMenuPos({ top: rect.bottom, left: rect.left });
-    }
-    setOpen((o) => !o);
-  };
+  const handleToggle = () => setOpen((o) => !o);
 
   return (
     <div ref={wrapperRef} className="text-effects-dropdown">
       <button
-        ref={btnRef}
         type="button"
         className="text-effects-btn"
         onClick={handleToggle}
@@ -290,13 +247,12 @@ export const TextEffectsDropdown = ({ onChange }: { onChange: (effect: string) =
         <span className="text-effects-btn__text">A</span>
         <ChevronDown size={12} />
       </button>
-      {open && typeof document !== 'undefined' && ReactDOM.createPortal(
+      {open && (
         <ul
           ref={menuRef}
           className="text-effects-menu"
           role="listbox"
           aria-label="Text effects and typography options"
-          style={{ top: menuPos.top, left: menuPos.left }}
         >
           {TEXT_EFFECT_OPTIONS.map((option) => (
             <li key={option.value} role="option" aria-selected={false}>
@@ -309,8 +265,7 @@ export const TextEffectsDropdown = ({ onChange }: { onChange: (effect: string) =
               </button>
             </li>
           ))}
-        </ul>,
-        document.body
+        </ul>
       )}
     </div>
   );
@@ -326,10 +281,8 @@ const ColorSwatch = ({ color }: { color: string }) => (
 
 export const FontColorDropdown = ({ onChange }: { onChange: (color: string) => void }) => {
   const [open, setOpen] = React.useState(false);
-  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const menuRef = React.useRef<HTMLUListElement>(null);
-  const btnRef = React.useRef<HTMLButtonElement>(null);
 
   React.useEffect(() => {
     if (!open) return;
@@ -343,18 +296,11 @@ export const FontColorDropdown = ({ onChange }: { onChange: (color: string) => v
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, [open]);
 
-  const handleToggle = () => {
-    if (!open && btnRef.current) {
-      const rect = btnRef.current.getBoundingClientRect();
-      setMenuPos({ top: rect.bottom, left: rect.left });
-    }
-    setOpen((o) => !o);
-  };
+  const handleToggle = () => setOpen((o) => !o);
 
   return (
     <div ref={wrapperRef} className="font-color-dropdown">
       <button
-        ref={btnRef}
         type="button"
         className="font-color-btn"
         onClick={handleToggle}
@@ -369,13 +315,12 @@ export const FontColorDropdown = ({ onChange }: { onChange: (color: string) => v
         </span>
         <ChevronDown size={12} />
       </button>
-      {open && typeof document !== 'undefined' && ReactDOM.createPortal(
+      {open && (
         <ul
           ref={menuRef}
           className="font-color-menu"
           role="listbox"
           aria-label="Font color options"
-          style={{ top: menuPos.top, left: menuPos.left }}
         >
           {FONT_COLOR_OPTIONS.map((option) => (
             <li key={option.value} role="option" aria-selected={false}>
@@ -389,8 +334,7 @@ export const FontColorDropdown = ({ onChange }: { onChange: (color: string) => v
               </button>
             </li>
           ))}
-        </ul>,
-        document.body
+        </ul>
       )}
     </div>
   );
@@ -398,10 +342,8 @@ export const FontColorDropdown = ({ onChange }: { onChange: (color: string) => v
 
 export const HighlightColorDropdown = ({ onChange }: { onChange: (color: string) => void }) => {
   const [open, setOpen] = React.useState(false);
-  const [menuPos, setMenuPos] = React.useState({ top: 0, left: 0 });
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const menuRef = React.useRef<HTMLUListElement>(null);
-  const btnRef = React.useRef<HTMLButtonElement>(null);
 
   React.useEffect(() => {
     if (!open) return;
@@ -415,18 +357,11 @@ export const HighlightColorDropdown = ({ onChange }: { onChange: (color: string)
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, [open]);
 
-  const handleToggle = () => {
-    if (!open && btnRef.current) {
-      const rect = btnRef.current.getBoundingClientRect();
-      setMenuPos({ top: rect.bottom, left: rect.left });
-    }
-    setOpen((o) => !o);
-  };
+  const handleToggle = () => setOpen((o) => !o);
 
   return (
     <div ref={wrapperRef} className="highlight-color-dropdown">
       <button
-        ref={btnRef}
         type="button"
         className="highlight-color-btn"
         onClick={handleToggle}
@@ -441,13 +376,12 @@ export const HighlightColorDropdown = ({ onChange }: { onChange: (color: string)
         </span>
         <ChevronDown size={12} />
       </button>
-      {open && typeof document !== 'undefined' && ReactDOM.createPortal(
+      {open && (
         <ul
           ref={menuRef}
           className="highlight-color-menu"
           role="listbox"
           aria-label="Text highlight options"
-          style={{ top: menuPos.top, left: menuPos.left }}
         >
           {HIGHLIGHT_COLOR_OPTIONS.map((option) => (
             <li key={option.value} role="option" aria-selected={false}>
@@ -461,8 +395,7 @@ export const HighlightColorDropdown = ({ onChange }: { onChange: (color: string)
               </button>
             </li>
           ))}
-        </ul>,
-        document.body
+        </ul>
       )}
     </div>
   );
