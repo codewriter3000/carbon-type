@@ -25,6 +25,7 @@ export default function WordProcessor() {
   const pendingFontSizeRef = useRef<string | null>(null);
 
   const [documentName] = useState('Document1');
+  // eslint-disable-next-line
   const [wordCount, setWordCount] = useState(0);
   const [autosaveEnabled, setAutosaveEnabled] = useState(true);
   const [autosaveStatus, setAutosaveStatus] = useState<'' | 'saving' | 'saved'>('');
