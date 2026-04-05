@@ -19,6 +19,13 @@ Use this skill when the task involves:
 This repository builds a word processor where ADA accessibility is a core product goal.
 Treat accessibility as a release requirement, not a polish task.
 
+## Companion files
+
+- `baseline-checklist.md` for feature-level accessibility gates before full WCAG review.
+- `keyboard-model.md` for default keyboard interaction expectations.
+- `focus-rules.md` for focus entry, containment, restoration, and visibility requirements.
+- `checklist.md` for full WCAG 2.2 AA audit coverage.
+
 ## Primary goals
 
 Always optimize for:

@@ -2,6 +2,8 @@
 
 Use this checklist to audit any feature, workflow, screen, component, document interaction, dialog, toolbar, panel, or export flow in this repository.
 
+For faster feature reviews, start with `baseline-checklist.md` and use `keyboard-model.md` plus `focus-rules.md` to define expected interaction behavior before running this full checklist.
+
 This checklist is intended to support conformance with **WCAG 2.2 Level AA**.
 For any feature under review, all applicable WCAG 2.2 Level A and Level AA Success Criteria must pass.
 If any applicable item fails, the feature is not WCAG 2.2 AA conformant.
