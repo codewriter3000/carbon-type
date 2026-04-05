@@ -5,6 +5,26 @@
     "custom-property-pattern": null,
     "color-function-notation": "modern",
     "alpha-value-notation": "number",
-    "no-descending-specificity": null
+    "no-descending-specificity": null,
+    "property-no-vendor-prefix": [
+      true,
+      {
+        "ignoreProperties": [
+          "-webkit-font-smoothing",
+          "-moz-osx-font-smoothing",
+          "-webkit-text-size-adjust"
+        ]
+      }
+    ],
+    "selector-pseudo-element-no-unknown": [
+      true,
+      {
+        "ignorePseudoElements": [
+          "-webkit-scrollbar",
+          "-webkit-scrollbar-track",
+          "-webkit-scrollbar-thumb"
+        ]
+      }
+    ]
   }
 }

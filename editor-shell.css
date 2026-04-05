@@ -265,8 +265,7 @@
   padding: 0 var(--space-3);
   background-color: var(--color-bg-toolbar);
   border-bottom: 1px solid var(--color-border-toolbar);
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: auto hidden;
   scrollbar-width: none;  /* Firefox — hide scrollbar, keyboard access still works */
   position: relative;
   z-index: var(--z-raised);
