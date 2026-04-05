@@ -1,0 +1,182 @@
+/* ============================================================
+   CARBON TYPE — LIGHT THEME
+   theme-light.css
+
+   Applied when:
+     1. OS prefers light AND no explicit [data-theme] is set.
+     2. User explicitly sets [data-theme="light"] (via JS).
+
+   Contrast targets (WCAG 2.2 AA):
+     text-primary   on bg-base:    ~14:1  (AAA)
+     text-secondary on bg-base:    ~6:1   (AA)
+     text-muted     on bg-base:    ~4.6:1 (AA)
+     focus-ring     on bg-base:    ~5:1   (AA, meets 2.4.13)
+   ============================================================ */
+
+/* System preference — no JS required */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --color-bg-base:        var(--color-slate-100);
+    --color-bg-surface:     #fff;
+    --color-bg-elevated:    var(--color-slate-50);
+    --color-bg-overlay:     #fff;
+    --color-bg-interactive: var(--color-slate-100);
+    --color-bg-editor:      #fff;
+    --color-bg-selected:    rgb(66 99 235 / 0.1);
+    --color-bg-selection:   rgb(66 99 235 / 0.2);
+
+    --color-text-primary:   var(--color-slate-900);
+    --color-text-secondary: var(--color-slate-700);
+    --color-text-muted:     var(--color-slate-600);
+    --color-text-disabled:  var(--color-slate-400);
+    --color-text-inverse:   var(--color-slate-50);
+    --color-text-on-accent: #fff;
+    --color-text-accent:    var(--color-blue-700);
+    --color-text-link:      var(--color-blue-700);
+    --color-text-link-hover: var(--color-blue-800);
+    --color-text-error:     var(--color-red-600);
+    --color-text-success:   var(--color-green-600);
+    --color-text-warning:   var(--color-yellow-500);
+
+    --color-border-subtle:  var(--color-slate-200);
+    --color-border-default: var(--color-slate-300);
+    --color-border-strong:  var(--color-slate-400);
+    --color-border-error:   var(--color-red-600);
+
+    --focus-ring-color:     var(--color-blue-700);
+
+    --color-accent:         var(--color-blue-700);
+    --color-accent-hover:   var(--color-blue-800);
+    --color-accent-active:  var(--color-blue-900);
+    --color-accent-muted:   rgb(66 99 235 / 0.1);
+
+    --color-bg-toolbar:              var(--color-slate-50);
+    --color-border-toolbar:          var(--color-slate-200);
+    --color-bg-toolbar-btn:          transparent;
+    --color-bg-toolbar-btn-hover:    var(--color-slate-100);
+    --color-bg-toolbar-btn-pressed:  rgb(66 99 235 / 0.12);
+    --color-text-toolbar:            var(--color-slate-700);
+
+    --color-bg-sidebar:              var(--color-slate-50);
+    --color-border-sidebar:          var(--color-slate-200);
+    --color-bg-sidebar-item-hover:   var(--color-slate-100);
+    --color-bg-sidebar-item-active:  rgb(66 99 235 / 0.1);
+    --color-text-sidebar:            var(--color-slate-600);
+    --color-text-sidebar-active:     var(--color-blue-700);
+
+    --color-bg-header:               #fff;
+    --color-border-header:           var(--color-slate-200);
+    --color-text-header:             var(--color-slate-900);
+
+    --color-bg-status-bar:           var(--color-slate-50);
+    --color-border-status-bar:       var(--color-slate-200);
+    --color-text-status-bar:         var(--color-slate-500);
+
+    --color-bg-input:                #fff;
+    --color-border-input:            var(--color-slate-300);
+    --color-border-input-hover:      var(--color-slate-400);
+    --color-text-input:              var(--color-slate-900);
+    --color-text-placeholder:        var(--color-slate-500);
+
+    --color-bg-btn-primary:          var(--color-blue-700);
+    --color-bg-btn-primary-hover:    var(--color-blue-800);
+    --color-bg-btn-primary-active:   var(--color-blue-900);
+    --color-text-btn-primary:        #fff;
+    --color-bg-btn-ghost:            transparent;
+    --color-bg-btn-ghost-hover:      var(--color-slate-100);
+    --color-text-btn-ghost:          var(--color-slate-700);
+
+    --shadow-xs:     0 1px 2px rgb(0 0 0 / 0.08);
+    --shadow-sm:     0 1px 4px rgb(0 0 0 / 0.1);
+    --shadow-md:     0 4px 12px rgb(0 0 0 / 0.12);
+    --shadow-lg:     0 8px 24px rgb(0 0 0 / 0.15);
+    --shadow-xl:     0 16px 40px rgb(0 0 0 / 0.18);
+    --shadow-editor: 0 4px 24px rgb(0 0 0 / 0.1);
+
+    --color-scrollbar-thumb: var(--color-slate-300);
+    --color-scrollbar-track: var(--color-slate-100);
+  }
+}
+
+/* Explicit light mode — JS sets this; overrides the media query */
+[data-theme="light"] {
+  --color-bg-base:        var(--color-slate-100);
+  --color-bg-surface:     #fff;
+  --color-bg-elevated:    var(--color-slate-50);
+  --color-bg-overlay:     #fff;
+  --color-bg-interactive: var(--color-slate-100);
+  --color-bg-editor:      #fff;
+  --color-bg-selected:    rgb(66 99 235 / 0.1);
+  --color-bg-selection:   rgb(66 99 235 / 0.2);
+
+  --color-text-primary:   var(--color-slate-900);
+  --color-text-secondary: var(--color-slate-700);
+  --color-text-muted:     var(--color-slate-600);
+  --color-text-disabled:  var(--color-slate-400);
+  --color-text-inverse:   var(--color-slate-50);
+  --color-text-on-accent: #fff;
+  --color-text-accent:    var(--color-blue-700);
+  --color-text-link:      var(--color-blue-700);
+  --color-text-link-hover: var(--color-blue-800);
+  --color-text-error:     var(--color-red-600);
+  --color-text-success:   var(--color-green-600);
+  --color-text-warning:   var(--color-yellow-500);
+
+  --color-border-subtle:  var(--color-slate-200);
+  --color-border-default: var(--color-slate-300);
+  --color-border-strong:  var(--color-slate-400);
+  --color-border-error:   var(--color-red-600);
+
+  --focus-ring-color:     var(--color-blue-700);
+
+  --color-accent:         var(--color-blue-700);
+  --color-accent-hover:   var(--color-blue-800);
+  --color-accent-active:  var(--color-blue-900);
+  --color-accent-muted:   rgb(66 99 235 / 0.1);
+
+  --color-bg-toolbar:              var(--color-slate-50);
+  --color-border-toolbar:          var(--color-slate-200);
+  --color-bg-toolbar-btn:          transparent;
+  --color-bg-toolbar-btn-hover:    var(--color-slate-100);
+  --color-bg-toolbar-btn-pressed:  rgb(66 99 235 / 0.12);
+  --color-text-toolbar:            var(--color-slate-700);
+
+  --color-bg-sidebar:              var(--color-slate-50);
+  --color-border-sidebar:          var(--color-slate-200);
+  --color-bg-sidebar-item-hover:   var(--color-slate-100);
+  --color-bg-sidebar-item-active:  rgb(66 99 235 / 0.1);
+  --color-text-sidebar:            var(--color-slate-600);
+  --color-text-sidebar-active:     var(--color-blue-700);
+
+  --color-bg-header:               #fff;
+  --color-border-header:           var(--color-slate-200);
+  --color-text-header:             var(--color-slate-900);
+
+  --color-bg-status-bar:           var(--color-slate-50);
+  --color-border-status-bar:       var(--color-slate-200);
+  --color-text-status-bar:         var(--color-slate-500);
+
+  --color-bg-input:                #fff;
+  --color-border-input:            var(--color-slate-300);
+  --color-border-input-hover:      var(--color-slate-400);
+  --color-text-input:              var(--color-slate-900);
+  --color-text-placeholder:        var(--color-slate-500);
+
+  --color-bg-btn-primary:          var(--color-blue-700);
+  --color-bg-btn-primary-hover:    var(--color-blue-800);
+  --color-bg-btn-primary-active:   var(--color-blue-900);
+  --color-text-btn-primary:        #fff;
+  --color-bg-btn-ghost:            transparent;
+  --color-bg-btn-ghost-hover:      var(--color-slate-100);
+  --color-text-btn-ghost:          var(--color-slate-700);
+
+  --shadow-xs:     0 1px 2px rgb(0 0 0 / 0.08);
+  --shadow-sm:     0 1px 4px rgb(0 0 0 / 0.1);
+  --shadow-md:     0 4px 12px rgb(0 0 0 / 0.12);
+  --shadow-lg:     0 8px 24px rgb(0 0 0 / 0.15);
+  --shadow-xl:     0 16px 40px rgb(0 0 0 / 0.18);
+  --shadow-editor: 0 4px 24px rgb(0 0 0 / 0.1);
+
+  --color-scrollbar-thumb: var(--color-slate-300);
+  --color-scrollbar-track: var(--color-slate-100);
+}

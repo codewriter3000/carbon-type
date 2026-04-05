@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <!--
+    data-theme="dark" is set inline so dark styles apply before
+    any JavaScript runs, preventing a flash of light content.
+    main.js will overwrite this attribute if the user has an
+    explicit preference stored in localStorage.
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      color-scheme tells the browser to render native UI elements
+      (scrollbars, form controls, system dialogs) in dark mode first.
+    -->
+    <meta name="color-scheme" content="dark light" />
+    <title>Untitled Document — Carbon Type</title>
+    <meta name="description" content="Carbon Type: dark-theme-first academic word processor for college research papers." />
+    <script type="module" src="/main.js"></script>
+  </head>
+  <body>
+
+    <!--
+      SKIP LINKS
+      These appear before any shell chrome. Keyboard users can
+      jump directly to the outline or the editor without tabbing
+      through the header and toolbar every time.
+      WCAG 2.1.1, 2.4.1
+    -->
+    <a class="skip-link" href="#editor-canvas">Skip to editor</a>
+    <a class="skip-link" href="#outline">Skip to outline</a>
+
+    <div class="app-layout">
+
+      <!-- ═══════════════════════════════════════
+           APP HEADER
+           role="banner" is implicit on <header>.
+           ═══════════════════════════════════════ -->
+      <header class="app-header">
+
+        <!-- Brand -->
+        <div class="app-header__brand">
+          <span class="app-header__logo" aria-hidden="true">CT</span>
+          <span class="app-header__app-name">Carbon Type</span>
+        </div>
+
+        <!-- Document title + save status -->
+        <div class="app-header__document">
+          <!--
+            The document title is editable inline. It is a button
+            that, when activated, switches to an <input> for renaming.
+            For the initial shell it is a static button placeholder.
+            aria-label describes the full action including current value.
+          -->
+          <button
+            class="document-title-btn"
+            type="button"
+            aria-label="Document title: Untitled Document. Activate to rename."
+          >
+            Untitled Document
+          </button>
+
+          <!--
+            Save status live region.
+            aria-live="polite" announces changes after the user pauses.
+            aria-atomic="true" reads the full string, not just the diff.
+            WCAG SC 4.1.3 – Status Messages.
+          -->
+          <span
+            class="save-status"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            data-state="saved"
+          >
+            All changes saved
+          </span>
+        </div>
+
+        <!-- Header action buttons -->
+        <div class="app-header__actions" role="group" aria-label="Document actions">
+          <button class="btn btn--ghost" type="button" aria-label="Export document">
+            Export
+          </button>
+          <button class="btn btn--ghost" type="button" aria-label="Open document settings">
+            Settings
+          </button>
+        </div>
+
+      </header>
+
+      <!-- ═══════════════════════════════════════
+           FORMATTING TOOLBAR
+           role="toolbar" marks this as a composite widget.
+           Arrow keys move between controls within it.
+           Keyboard: Tab enters the toolbar; arrows move within.
+           ═══════════════════════════════════════ -->
+      <div
+        class="toolbar"
+        role="toolbar"
+        aria-label="Text formatting"
+        aria-controls="editor-canvas"
+      >
+
+        <!-- Paragraph / heading style -->
+        <div class="toolbar__group" role="group" aria-label="Paragraph style">
+          <label for="paragraph-style" class="sr-only">Paragraph style</label>
+          <select class="toolbar__select" id="paragraph-style" name="paragraph-style">
+            <option value="p">Normal</option>
+            <option value="h1">Heading 1</option>
+            <option value="h2">Heading 2</option>
+            <option value="h3">Heading 3</option>
+            <option value="h4">Heading 4</option>
+          </select>
+        </div>
+
+        <div class="toolbar__sep" aria-hidden="true"></div>
+
+        <!-- Inline formatting -->
+        <div class="toolbar__group" role="group" aria-label="Inline formatting">
+          <button
+            class="toolbar__btn"
+            type="button"
+            aria-label="Bold"
+            aria-pressed="false"
+            aria-keyshortcuts="Control+B"
+          >
+            <strong aria-hidden="true">B</strong>
+          </button>
+          <button
+            class="toolbar__btn"
+            type="button"
+            aria-label="Italic"
+            aria-pressed="false"
+            aria-keyshortcuts="Control+I"
+          >
+            <em aria-hidden="true">I</em>
+          </button>
+          <button
+            class="toolbar__btn"
+            type="button"
+            aria-label="Underline"
+            aria-pressed="false"
+            aria-keyshortcuts="Control+U"
+          >
+            <span aria-hidden="true" style="text-decoration: underline;">U</span>
+          </button>
+          <button
+            class="toolbar__btn"
+            type="button"
+            aria-label="Strikethrough"
+            aria-pressed="false"
+          >
+            <span aria-hidden="true" style="text-decoration: line-through;">S</span>
+          </button>
+        </div>
+
+        <div class="toolbar__sep" aria-hidden="true"></div>
+
+        <!-- Lists -->
+        <div class="toolbar__group" role="group" aria-label="Lists">
+          <button
+            class="toolbar__btn"
+            type="button"
+            aria-label="Bulleted list"
+            aria-pressed="false"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle cx="2" cy="4" r="1.5" />
+              <rect x="5" y="3" width="9" height="2" rx="1" />
+              <circle cx="2" cy="8" r="1.5" />
+              <rect x="5" y="7" width="9" height="2" rx="1" />
+              <circle cx="2" cy="12" r="1.5" />
+              <rect x="5" y="11" width="9" height="2" rx="1" />
+            </svg>
+          </button>
+          <button
+            class="toolbar__btn"
+            type="button"
+            aria-label="Numbered list"
+            aria-pressed="false"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <text x="0" y="5" font-size="5" font-family="sans-serif">1.</text>
+              <rect x="5" y="3" width="9" height="2" rx="1" />
+              <text x="0" y="9" font-size="5" font-family="sans-serif">2.</text>
+              <rect x="5" y="7" width="9" height="2" rx="1" />
+              <text x="0" y="13" font-size="5" font-family="sans-serif">3.</text>
+              <rect x="5" y="11" width="9" height="2" rx="1" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="toolbar__sep" aria-hidden="true"></div>
+
+        <!-- Text alignment -->
+        <div class="toolbar__group" role="group" aria-label="Text alignment">
+          <button class="toolbar__btn" type="button" aria-label="Align left" aria-pressed="true">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">
+              <rect x="1" y="3" width="14" height="2" rx="1" />
+              <rect x="1" y="7" width="9" height="2" rx="1" />
+              <rect x="1" y="11" width="12" height="2" rx="1" />
+            </svg>
+          </button>
+          <button class="toolbar__btn" type="button" aria-label="Align center" aria-pressed="false">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">
+              <rect x="1" y="3" width="14" height="2" rx="1" />
+              <rect x="3.5" y="7" width="9" height="2" rx="1" />
+              <rect x="2" y="11" width="12" height="2" rx="1" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="toolbar__sep" aria-hidden="true"></div>
+
+        <!-- Academic tools — primary research-paper controls -->
+        <div class="toolbar__group" role="group" aria-label="Academic tools">
+          <button
+            class="toolbar__btn"
+            type="button"
+            aria-label="Insert citation"
+            aria-keyshortcuts="Control+Shift+C"
+          >
+            Cite
+          </button>
+          <button
+            class="toolbar__btn"
+            type="button"
+            aria-label="Insert footnote"
+            aria-keyshortcuts="Control+Shift+F"
+          >
+            Fn
+          </button>
+          <button
+            class="toolbar__btn"
+            type="button"
+            aria-label="Insert endnote"
+          >
+            En
+          </button>
+          <button
+            class="toolbar__btn"
+            type="button"
+            aria-label="Open bibliography"
+          >
+            Bib
+          </button>
+        </div>
+
+      </div>
+      <!-- /toolbar -->
+
+      <!-- ═══════════════════════════════════════
+           WORKSPACE — sidebar + editor
+           ═══════════════════════════════════════ -->
+      <div class="workspace">
+
+        <!-- ─────────────────────────────────────
+             OUTLINE SIDEBAR
+             <nav> landmark — screen readers can
+             jump to this region directly.
+             ───────────────────────────────────── -->
+        <nav
+          class="outline-sidebar"
+          id="outline"
+          aria-label="Document outline"
+          tabindex="-1"
+        >
+          <div class="outline-sidebar__header">
+            <h2 class="outline-sidebar__heading" id="outline-heading">
+              Outline
+            </h2>
+            <button
+              class="outline-sidebar__collapse-btn btn btn--icon btn--ghost"
+              type="button"
+              aria-label="Collapse outline sidebar"
+              aria-expanded="true"
+              aria-controls="outline-list"
+            >
+              <!--
+                chevron-left icon
+                aria-hidden because the label is on the button
+              -->
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <polyline points="9,2 4,7 9,12" />
+              </svg>
+            </button>
+          </div>
+
+          <!--
+            Outline list — links jump to document sections.
+            aria-labelledby connects this list to its heading.
+          -->
+          <ol
+            class="outline-list"
+            id="outline-list"
+            role="list"
+            aria-labelledby="outline-heading"
+          >
+            <!-- Items populated dynamically by the editor engine. -->
+            <!-- Example items shown for the initial shell only: -->
+            <li class="outline-list__item outline-list__item--h1">
+              <a
+                class="outline-list__link"
+                href="#section-intro"
+                aria-current="true"
+              >
+                Introduction
+              </a>
+            </li>
+            <li class="outline-list__item outline-list__item--h2">
+              <a class="outline-list__link" href="#section-bg">
+                Background
+              </a>
+            </li>
+            <li class="outline-list__item outline-list__item--h2">
+              <a class="outline-list__link" href="#section-method">
+                Methodology
+              </a>
+            </li>
+            <li class="outline-list__item outline-list__item--h3">
+              <a class="outline-list__link" href="#section-data">
+                Data Collection
+              </a>
+            </li>
+            <li class="outline-list__item outline-list__item--h2">
+              <a class="outline-list__link" href="#section-results">
+                Results
+              </a>
+            </li>
+            <li class="outline-list__item outline-list__item--h2">
+              <a class="outline-list__link" href="#section-discussion">
+                Discussion
+              </a>
+            </li>
+            <li class="outline-list__item outline-list__item--h1">
+              <a class="outline-list__link" href="#section-refs">
+                References
+              </a>
+            </li>
+          </ol>
+        </nav>
+        <!-- /outline-sidebar -->
+
+        <!-- ─────────────────────────────────────
+             EDITOR MAIN
+             <main> landmark — the primary content.
+             tabindex="-1" allows skip-link focus.
+             ───────────────────────────────────── -->
+        <main
+          class="editor-main"
+          id="editor"
+          tabindex="-1"
+        >
+          <div class="editor-canvas-wrapper">
+            <!--
+              Editor canvas.
+
+              role="textbox" aria-multiline="true" is the correct
+              ARIA pattern for a rich-text contenteditable region.
+              (A plain contenteditable div has no semantic role.)
+
+              spellcheck="true" enables native spell checking.
+
+              aria-label names the control for screen readers;
+              the editor framework should update this when the
+              document title changes.
+
+              The editor framework (e.g. ProseMirror, Tiptap) will
+              take over this element and may set additional ARIA.
+            -->
+            <div
+              class="editor-canvas document-root"
+              id="editor-canvas"
+              role="textbox"
+              aria-multiline="true"
+              aria-label="Document editor: Untitled Document"
+              contenteditable="true"
+              spellcheck="true"
+              tabindex="0"
+            >
+              <h1 id="section-intro">Introduction</h1>
+              <p>
+                Begin writing your research paper here. Use the toolbar above to
+                apply headings, formatting, citations, and footnotes.
+              </p>
+              <h2 id="section-bg">Background</h2>
+              <p>
+                Provide context and prior work relevant to your topic.
+              </p>
+              <h2 id="section-method">Methodology</h2>
+              <p>
+                Describe your research methods and data sources.
+              </p>
+              <h3 id="section-data">Data Collection</h3>
+              <p>
+                Explain how data was gathered and validated.
+              </p>
+              <h2 id="section-results">Results</h2>
+              <p>
+                Present your findings clearly and objectively.
+              </p>
+              <h2 id="section-discussion">Discussion</h2>
+              <p>
+                Interpret your results and relate them to the existing literature.
+              </p>
+              <h1 id="section-refs">References</h1>
+              <p>
+                <!-- Bibliography entries populated by the citation engine -->
+              </p>
+            </div>
+          </div>
+        </main>
+        <!-- /editor-main -->
+
+      </div>
+      <!-- /workspace -->
+
+      <!-- ═══════════════════════════════════════
+           STATUS BAR
+           role="contentinfo" is implicit on <footer>.
+           ═══════════════════════════════════════ -->
+      <footer class="status-bar">
+
+        <div class="status-bar__section">
+          <!--
+            Word and character counts are informational.
+            aria-label provides a full accessible description
+            so screen readers do not just read raw numbers.
+          -->
+          <span
+            class="status-bar__item"
+            id="word-count"
+            aria-label="Word count: 0 words"
+          >
+            0 words
+          </span>
+          <span
+            class="status-bar__item"
+            id="char-count"
+            aria-label="Character count: 0 characters"
+          >
+            0 chars
+          </span>
+        </div>
+
+        <div class="status-bar__section">
+          <!--
+            Duplicate save status for the status bar.
+            The header live region is the primary announcement;
+            this one is visual-only (role and aria-live omitted
+            to avoid double-announcing).
+          -->
+          <span class="status-bar__item" aria-hidden="true">
+            All changes saved
+          </span>
+
+          <!--
+            Theme toggle.
+            data-action="toggle-theme" is picked up by main.js.
+            aria-pressed reflects the current state (dark = true).
+          -->
+          <button
+            class="theme-toggle-btn"
+            type="button"
+            data-action="toggle-theme"
+            aria-label="Switch to light theme"
+            aria-pressed="true"
+          >
+            ☀ Light
+          </button>
+        </div>
+
+      </footer>
+      <!-- /status-bar -->
+
+    </div>
+    <!-- /app-layout -->
+
+  </body>
+</html>

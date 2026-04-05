@@ -1,0 +1,116 @@
+/* ============================================================
+   CARBON TYPE — DARK THEME
+   theme-dark.css
+
+   Dark is the PRIMARY design target for this application.
+   These semantic color tokens are the defaults applied to :root.
+   They are also applied explicitly when [data-theme="dark"] is
+   set, allowing JS to enforce dark mode regardless of OS pref.
+
+   Contrast targets (WCAG 2.2 AA):
+     text-primary   on bg-base:    ~16:1  (AAA)
+     text-secondary on bg-base:    ~9:1   (AAA)
+     text-muted     on bg-base:    ~5.7:1 (AA)
+     focus-ring     on bg-base:    ~10:1  (AAA)
+   ============================================================ */
+
+:root,
+[data-theme="dark"] {
+  /* ── Backgrounds ──────────────────────── */
+  --color-bg-base:        var(--color-slate-950);  /* App shell bg */
+  --color-bg-surface:     var(--color-slate-900);  /* Panels, toolbar */
+  --color-bg-elevated:    var(--color-slate-850);  /* Raised surfaces */
+  --color-bg-overlay:     var(--color-slate-800);  /* Dropdowns, modals */
+  --color-bg-interactive: var(--color-slate-800);  /* Hover bg */
+
+  /* Editor canvas — a distinct tone from UI panels */
+  --color-bg-editor:      #1e1f24;
+
+  /* Selection and highlight */
+  --color-bg-selected:    rgb(116 192 252 / 0.15);
+  --color-bg-selection:   rgb(116 192 252 / 0.3);
+
+  /* ── Text ─────────────────────────────── */
+  --color-text-primary:   var(--color-slate-200);  /* Body text */
+  --color-text-secondary: var(--color-slate-500);  /* Labels, metadata */
+  --color-text-muted:     var(--color-slate-600);  /* Placeholders */
+  --color-text-disabled:  var(--color-slate-700);  /* Disabled controls */
+  --color-text-inverse:   var(--color-slate-950);  /* Text on light bg */
+  --color-text-on-accent: var(--color-slate-950);  /* Text on accent btn */
+  --color-text-accent:    var(--color-sky-300);    /* Links, active items */
+  --color-text-link:      var(--color-sky-300);
+  --color-text-link-hover: var(--color-sky-200);
+  --color-text-error:     var(--color-red-400);
+  --color-text-success:   var(--color-green-400);
+  --color-text-warning:   var(--color-yellow-400);
+
+  /* ── Borders ──────────────────────────── */
+  --color-border-subtle:  var(--color-slate-850);  /* Hairline dividers */
+  --color-border-default: var(--color-slate-750);  /* Input / panel edges */
+  --color-border-strong:  var(--color-slate-600);  /* Prominent borders */
+  --color-border-error:   var(--color-red-400);
+
+  /* ── Focus ring ───────────────────────── */
+  /* High-contrast sky blue: ~10:1 on slate-950 */
+  --focus-ring-color:     var(--color-sky-300);
+
+  /* ── Accent / brand ───────────────────── */
+  --color-accent:         var(--color-sky-300);
+  --color-accent-hover:   var(--color-sky-200);
+  --color-accent-active:  var(--color-sky-400);
+  --color-accent-muted:   rgb(116 192 252 / 0.15);
+
+  /* ── Toolbar ──────────────────────────── */
+  --color-bg-toolbar:              var(--color-slate-900);
+  --color-border-toolbar:          var(--color-slate-750);
+  --color-bg-toolbar-btn:          transparent;
+  --color-bg-toolbar-btn-hover:    var(--color-slate-800);
+  --color-bg-toolbar-btn-pressed:  rgb(116 192 252 / 0.2);
+  --color-text-toolbar:            var(--color-slate-300);
+
+  /* ── Sidebar ──────────────────────────── */
+  --color-bg-sidebar:              var(--color-slate-900);
+  --color-border-sidebar:          var(--color-slate-750);
+  --color-bg-sidebar-item-hover:   var(--color-slate-850);
+  --color-bg-sidebar-item-active:  rgb(116 192 252 / 0.15);
+  --color-text-sidebar:            var(--color-slate-400);
+  --color-text-sidebar-active:     var(--color-sky-300);
+
+  /* ── Header ───────────────────────────── */
+  --color-bg-header:               var(--color-slate-950);
+  --color-border-header:           var(--color-slate-800);
+  --color-text-header:             var(--color-slate-200);
+
+  /* ── Status bar ───────────────────────── */
+  --color-bg-status-bar:           var(--color-slate-950);
+  --color-border-status-bar:       var(--color-slate-800);
+  --color-text-status-bar:         var(--color-slate-600);
+
+  /* ── Form controls ────────────────────── */
+  --color-bg-input:                var(--color-slate-850);
+  --color-border-input:            var(--color-slate-700);
+  --color-border-input-hover:      var(--color-slate-600);
+  --color-text-input:              var(--color-slate-200);
+  --color-text-placeholder:        var(--color-slate-600);
+
+  /* ── Buttons ──────────────────────────── */
+  --color-bg-btn-primary:          #1971c2;
+  --color-bg-btn-primary-hover:    #1864ab;
+  --color-bg-btn-primary-active:   #145591;
+  --color-text-btn-primary:        #fff;
+  --color-bg-btn-ghost:            transparent;
+  --color-bg-btn-ghost-hover:      var(--color-slate-800);
+  --color-text-btn-ghost:          var(--color-slate-300);
+
+  /* ── Shadows — heavier in dark mode for elevation clarity ── */
+  --shadow-xs:     0 1px 2px rgb(0 0 0 / 0.45);
+  --shadow-sm:     0 1px 4px rgb(0 0 0 / 0.55);
+  --shadow-md:     0 4px 12px rgb(0 0 0 / 0.65);
+  --shadow-lg:     0 8px 24px rgb(0 0 0 / 0.75);
+  --shadow-xl:     0 16px 40px rgb(0 0 0 / 0.85);
+  --shadow-editor: 0 4px 32px rgb(0 0 0 / 0.7);
+
+  /* ── Scrollbar (Chromium custom scrollbar) ─ */
+  --color-scrollbar-thumb: var(--color-slate-700);
+  --color-scrollbar-track: var(--color-slate-900);
+}
