@@ -1,0 +1,226 @@
+/* ============================================================
+   CARBON TYPE — DESIGN TOKENS
+   tokens.css
+
+   Color primitives and all non-theme-variant tokens.
+   Semantic color tokens are in theme-dark.css / theme-light.css.
+   Nothing here changes between dark and light themes.
+   ============================================================ */
+
+:root {
+  /* ──────────────────────────────────────────
+     COLOR PRIMITIVES
+     Never reference directly in components.
+     Use semantic tokens from theme files.
+     ────────────────────────────────────────── */
+
+  /* Slate — primary neutral */
+  --color-slate-50:  #f8f9fa;
+  --color-slate-100: #f1f3f5;
+  --color-slate-200: #e9ecef;
+  --color-slate-300: #dee2e6;
+  --color-slate-400: #ced4da;
+  --color-slate-500: #adb5bd;
+  --color-slate-600: #868e96;
+  --color-slate-700: #495057;
+  --color-slate-750: #373a40;
+  --color-slate-800: #2c2d33;
+  --color-slate-850: #25262b;
+  --color-slate-900: #1a1b1e;
+  --color-slate-950: #141517;
+
+  /* Blue — structural accent */
+  --color-blue-100: #dbe4ff;
+  --color-blue-200: #bac8ff;
+  --color-blue-300: #91a7ff;
+  --color-blue-400: #748ffc;
+  --color-blue-500: #5c7cfa;
+  --color-blue-600: #4c6ef5;
+  --color-blue-700: #4263eb;
+  --color-blue-800: #3b5bdb;
+  --color-blue-900: #364fc7;
+
+  /* Sky — lighter blue for dark-surface contrast */
+  --color-sky-100: #c5f6fa;
+  --color-sky-200: #a5d8ff;
+  --color-sky-300: #74c0fc;
+  --color-sky-400: #4dabf7;
+  --color-sky-500: #339af0;
+  --color-sky-600: #228be6;
+  --color-sky-700: #1c7ed6;
+
+  /* Red — error / destructive */
+  --color-red-200: #ffc9c9;
+  --color-red-300: #ffa8a8;
+  --color-red-400: #ff6b6b;
+  --color-red-500: #fa5252;
+  --color-red-600: #f03e3e;
+  --color-red-700: #e03131;
+
+  /* Green — success / saved */
+  --color-green-200: #b2f2bb;
+  --color-green-300: #8ce99a;
+  --color-green-400: #69db7c;
+  --color-green-500: #51cf66;
+  --color-green-600: #40c057;
+
+  /* Yellow — warning / caution */
+  --color-yellow-200: #ffec99;
+  --color-yellow-300: #ffe066;
+  --color-yellow-400: #ffd43b;
+  --color-yellow-500: #fcc419;
+
+  /* ──────────────────────────────────────────
+     TYPOGRAPHY TOKENS
+     ────────────────────────────────────────── */
+
+  /* Font families */
+  --font-sans:     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-serif:    Georgia, "Times New Roman", "Noto Serif", serif;
+  --font-mono:     "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace;
+
+  /* Context aliases */
+  --font-ui:       var(--font-sans);
+  --font-document: var(--font-serif);
+
+  /* Font size scale (rem, 16px root) */
+  --text-2xs:  0.625rem;   /*  10px */
+  --text-xs:   0.6875rem;  /*  11px */
+  --text-sm:   0.75rem;    /*  12px */
+  --text-base: 0.875rem;   /*  14px — UI base */
+  --text-md:   1rem;       /*  16px — document base */
+  --text-lg:   1.125rem;   /*  18px */
+  --text-xl:   1.25rem;    /*  20px */
+  --text-2xl:  1.5rem;     /*  24px */
+  --text-3xl:  1.875rem;   /*  30px */
+  --text-4xl:  2.25rem;    /*  36px */
+  --text-5xl:  3rem;       /*  48px */
+
+  /* Font weights */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* Line heights */
+  --leading-none:     1;
+  --leading-tight:    1.25;
+  --leading-snug:     1.375;
+  --leading-normal:   1.5;
+  --leading-relaxed:  1.625;
+  --leading-loose:    1.8;
+  --leading-document: 1.75;  /* Optimised for long-form academic reading */
+
+  /* Letter spacing */
+  --tracking-tight:   -0.025em;
+  --tracking-normal:   0;
+  --tracking-wide:     0.025em;
+  --tracking-wider:    0.05em;
+  --tracking-widest:   0.1em;
+  --tracking-ui:       0.01em;  /* Subtle clarity boost for small UI labels */
+
+  /* ──────────────────────────────────────────
+     SPACING SCALE — 4px base unit
+     ────────────────────────────────────────── */
+
+  --space-px:   1px;
+  --space-0:    0;
+  --space-0-5:  0.125rem;  /*  2px */
+  --space-1:    0.25rem;   /*  4px */
+  --space-1-5:  0.375rem;  /*  6px */
+  --space-2:    0.5rem;    /*  8px */
+  --space-2-5:  0.625rem;  /* 10px */
+  --space-3:    0.75rem;   /* 12px */
+  --space-3-5:  0.875rem;  /* 14px */
+  --space-4:    1rem;      /* 16px */
+  --space-5:    1.25rem;   /* 20px */
+  --space-6:    1.5rem;    /* 24px */
+  --space-7:    1.75rem;   /* 28px */
+  --space-8:    2rem;      /* 32px */
+  --space-9:    2.25rem;   /* 36px */
+  --space-10:   2.5rem;    /* 40px */
+  --space-11:   2.75rem;   /* 44px */
+  --space-12:   3rem;      /* 48px */
+  --space-14:   3.5rem;    /* 56px */
+  --space-16:   4rem;      /* 64px */
+  --space-20:   5rem;      /* 80px */
+  --space-24:   6rem;      /* 96px */
+  --space-32:   8rem;      /* 128px */
+
+  /* ──────────────────────────────────────────
+     BORDER RADIUS
+     ────────────────────────────────────────── */
+
+  --radius-none: 0;
+  --radius-xs:   2px;
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   8px;
+  --radius-xl:   12px;
+  --radius-2xl:  16px;
+  --radius-full: 9999px;
+
+  /* ──────────────────────────────────────────
+     Z-INDEX SCALE
+     ────────────────────────────────────────── */
+
+  --z-below:     -1;
+  --z-base:       0;
+  --z-raised:     1;
+  --z-dropdown:   100;
+  --z-sticky:     200;
+  --z-overlay:    300;
+  --z-modal:      400;
+  --z-toast:      500;
+
+  /* ──────────────────────────────────────────
+     MOTION
+     Duration values are used in CSS transitions.
+     reset.css zeros these for prefers-reduced-motion.
+     ────────────────────────────────────────── */
+
+  --duration-instant:  0ms;
+  --duration-fast:     100ms;
+  --duration-normal:   200ms;
+  --duration-slow:     300ms;
+  --duration-slower:   500ms;
+
+  --ease-standard:    cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-decelerate:  cubic-bezier(0, 0, 0.2, 1);
+  --ease-accelerate:  cubic-bezier(0.4, 0, 1, 1);
+
+  /* ──────────────────────────────────────────
+     FOCUS RING
+     Width and offset are shared across themes.
+     Color is set per-theme (--focus-ring-color).
+     ────────────────────────────────────────── */
+
+  --focus-ring-width:  2px;
+  --focus-ring-offset: 3px;
+
+  /* ──────────────────────────────────────────
+     LAYOUT DIMENSIONS
+     ────────────────────────────────────────── */
+
+  --header-height:            3.5rem;   /* 56px */
+  --toolbar-height:           2.75rem;  /* 44px */
+  --status-bar-height:        1.75rem;  /* 28px */
+  --sidebar-width:            14rem;    /* 224px */
+  --sidebar-width-collapsed:  2.5rem;   /* 40px — icon rail */
+
+  /* Canvas max-width approximates an 8.5-inch page at screen density */
+  --editor-canvas-max-width:  52rem;    /* ~832px */
+  --editor-canvas-padding-x:  var(--space-16);
+  --editor-canvas-padding-y:  var(--space-12);
+
+  /* ──────────────────────────────────────────
+     DOCUMENT PAGE SETTINGS (print CSS)
+     ────────────────────────────────────────── */
+
+  --page-width:          8.5in;
+  --page-height:         11in;
+  --page-margin-top:     1in;
+  --page-margin-right:   1in;
+  --page-margin-bottom:  1in;
+  --page-margin-left:    1in;
+}

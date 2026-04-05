@@ -1,0 +1,673 @@
+/* ============================================================
+   CARBON TYPE — EDITOR SHELL
+   editor-shell.css
+
+   App layout, header, formatting toolbar, outline sidebar,
+   editor canvas, and status bar.
+
+   Layout grid (rows):
+     [header] [toolbar] [workspace] [status-bar]
+
+   Workspace grid (columns):
+     [sidebar] [editor-main]
+
+   Accessibility commitments:
+     - Skip links appear on focus before any shell chrome.
+     - All interactive elements have visible focus rings.
+     - Toolbar uses role="toolbar" with clear group boundaries.
+     - Sidebar uses <nav> with aria-label.
+     - Live regions announce save status without focus movement.
+     - Focus is never obscured by sticky header or toolbar.
+   ============================================================ */
+
+/* ──────────────────────────────────────────
+   SKIP LINKS
+   Visually hidden until focused; keyboard users
+   can bypass repeated shell chrome.
+   ────────────────────────────────────────── */
+
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: var(--z-toast);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  border-radius: var(--radius-md);
+  transform: translateY(-200%);
+  transition: transform var(--duration-fast) var(--ease-decelerate);
+  white-space: nowrap;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: var(--focus-ring-width) solid var(--color-text-inverse);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* ──────────────────────────────────────────
+   APP LAYOUT — top-level grid
+   ────────────────────────────────────────── */
+
+.app-layout {
+  display: grid;
+  grid-template-rows:
+    var(--header-height)
+    var(--toolbar-height)
+    1fr
+    var(--status-bar-height);
+  grid-template-areas:
+    "header"
+    "toolbar"
+    "workspace"
+    "status-bar";
+  height: 100dvh;
+  overflow: hidden;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+}
+
+/* ──────────────────────────────────────────
+   APP HEADER
+   ────────────────────────────────────────── */
+
+.app-header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
+  background-color: var(--color-bg-header);
+  border-bottom: 1px solid var(--color-border-header);
+  position: relative;
+  z-index: var(--z-sticky);
+}
+
+/* Brand mark */
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  margin-right: var(--space-2);
+}
+
+.app-header__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wider);
+  user-select: none;
+}
+
+.app-header__app-name {
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--tracking-tight);
+}
+
+/* Document title area */
+.app-header__document {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.document-title-btn {
+  flex: 1;
+  min-width: 0;
+  max-width: 28rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  text-align: left;
+  cursor: text;
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.document-title-btn:hover {
+  border-color: var(--color-border-default);
+  background-color: var(--color-bg-interactive);
+}
+
+.document-title-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-color: transparent;
+}
+
+/* Save status — live region, screen readers announce changes */
+.save-status {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition: color var(--duration-normal) var(--ease-standard);
+}
+
+.save-status[data-state="saving"] {
+  color: var(--color-text-warning);
+}
+
+.save-status[data-state="saved"] {
+  color: var(--color-text-success);
+}
+
+.save-status[data-state="error"] {
+  color: var(--color-text-error);
+}
+
+/* Header actions */
+.app-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+/* ──────────────────────────────────────────
+   BUTTONS — shared variants
+   ────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-1-5) var(--space-3);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+
+.btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.btn--primary {
+  background-color: var(--color-bg-btn-primary);
+  color: var(--color-text-btn-primary);
+}
+
+.btn--primary:hover {
+  background-color: var(--color-bg-btn-primary-hover);
+}
+
+.btn--primary:active {
+  background-color: var(--color-bg-btn-primary-active);
+}
+
+.btn--ghost {
+  background-color: var(--color-bg-btn-ghost);
+  color: var(--color-text-btn-ghost);
+}
+
+.btn--ghost:hover {
+  background-color: var(--color-bg-btn-ghost-hover);
+}
+
+.btn--ghost:active {
+  background-color: var(--color-bg-interactive);
+}
+
+.btn--icon {
+  padding: var(--space-1-5);
+  width: 2rem;
+  height: 2rem;
+  justify-content: center;
+}
+
+/* ──────────────────────────────────────────
+   FORMATTING TOOLBAR
+   role="toolbar" with grouped controls.
+   Keyboard: Tab to enter, arrows to move within.
+   ────────────────────────────────────────── */
+
+.toolbar {
+  grid-area: toolbar;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-3);
+  background-color: var(--color-bg-toolbar);
+  border-bottom: 1px solid var(--color-border-toolbar);
+  overflow: auto hidden;
+  scrollbar-width: none;  /* Firefox — hide scrollbar, keyboard access still works */
+  position: relative;
+  z-index: var(--z-raised);
+}
+
+.toolbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Toolbar groups separate logical control clusters */
+.toolbar__group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+  flex-shrink: 0;
+}
+
+/* Vertical divider between groups */
+.toolbar__sep {
+  width: 1px;
+  height: 1.25rem;
+  background-color: var(--color-border-default);
+  flex-shrink: 0;
+  margin: 0 var(--space-1);
+}
+
+/* Toolbar button */
+.toolbar__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 var(--space-2);
+  background-color: var(--color-bg-toolbar-btn);
+  color: var(--color-text-toolbar);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+  white-space: nowrap;
+}
+
+.toolbar__btn:hover {
+  background-color: var(--color-bg-toolbar-btn-hover);
+  color: var(--color-text-primary);
+}
+
+.toolbar__btn:active {
+  background-color: var(--color-bg-interactive);
+}
+
+/* Pressed / active toggle state */
+.toolbar__btn[aria-pressed="true"] {
+  background-color: var(--color-bg-toolbar-btn-pressed);
+  color: var(--color-accent);
+  border-color: var(--color-accent-muted);
+}
+
+.toolbar__btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.toolbar__btn:disabled,
+.toolbar__btn[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Heading style select */
+.toolbar__select {
+  height: 1.875rem;
+  padding: 0 var(--space-2);
+  background-color: var(--color-bg-input);
+  color: var(--color-text-input);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.toolbar__select:hover {
+  border-color: var(--color-border-input-hover);
+}
+
+.toolbar__select:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-color: transparent;
+}
+
+/* ──────────────────────────────────────────
+   WORKSPACE — sidebar + editor main
+   ────────────────────────────────────────── */
+
+.workspace {
+  grid-area: workspace;
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-areas: "sidebar editor";
+  overflow: hidden;
+}
+
+/* Collapsed sidebar state */
+.workspace[data-sidebar="collapsed"] {
+  grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+}
+
+/* ──────────────────────────────────────────
+   OUTLINE SIDEBAR
+   <nav> landmark with document section links.
+   ────────────────────────────────────────── */
+
+.outline-sidebar {
+  grid-area: sidebar;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-sidebar);
+  border-right: 1px solid var(--color-border-sidebar);
+  overflow: hidden;
+  transition: width var(--duration-normal) var(--ease-standard);
+}
+
+.outline-sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-3) var(--space-2);
+  flex-shrink: 0;
+}
+
+.outline-sidebar__heading {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.outline-sidebar__collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.outline-sidebar__collapse-btn:hover {
+  background-color: var(--color-bg-sidebar-item-hover);
+  color: var(--color-text-primary);
+}
+
+.outline-sidebar__collapse-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Outline list */
+.outline-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-1) var(--space-2) var(--space-4);
+}
+
+.outline-list__item {
+  display: block;
+}
+
+.outline-list__link {
+  display: block;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-text-sidebar);
+  line-height: var(--leading-snug);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.outline-list__link:hover {
+  background-color: var(--color-bg-sidebar-item-hover);
+  color: var(--color-text-primary);
+}
+
+.outline-list__link[aria-current="true"] {
+  background-color: var(--color-bg-sidebar-item-active);
+  color: var(--color-text-sidebar-active);
+}
+
+.outline-list__link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Heading-level indentation */
+.outline-list__item--h1 > .outline-list__link {
+  font-weight: var(--weight-semibold);
+  padding-left: var(--space-2);
+}
+
+.outline-list__item--h2 > .outline-list__link {
+  padding-left: var(--space-4);
+}
+
+.outline-list__item--h3 > .outline-list__link {
+  padding-left: var(--space-6);
+  font-size: var(--text-xs);
+}
+
+.outline-list__item--h4 > .outline-list__link {
+  padding-left: var(--space-8);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* Empty state */
+.outline-empty {
+  padding: var(--space-4) var(--space-3);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: var(--leading-relaxed);
+}
+
+/* ──────────────────────────────────────────
+   EDITOR MAIN — scrollable document area
+   ────────────────────────────────────────── */
+
+.editor-main {
+  grid-area: editor;
+  overflow-y: auto;
+  background-color: var(--color-bg-base);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Wrapper creates vertical padding and centres the canvas */
+.editor-canvas-wrapper {
+  width: 100%;
+  max-width: calc(var(--editor-canvas-max-width) + (var(--editor-canvas-padding-x) * 2));
+  padding: var(--editor-canvas-padding-y) var(--editor-canvas-padding-x);
+  flex: 1;
+}
+
+/* Editor canvas — the "paper" surface */
+.editor-canvas {
+  background-color: var(--color-bg-editor);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-editor);
+  min-height: 100%;
+  padding: var(--space-12) var(--space-12);
+  outline: none;
+
+  /* Caret colour — high-contrast sky in dark mode */
+  caret-color: var(--color-accent);
+}
+
+/* Focus ring on the editor canvas itself */
+.editor-canvas:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* ──────────────────────────────────────────
+   STATUS BAR
+   aria-live region for save state.
+   ────────────────────────────────────────── */
+
+.status-bar {
+  grid-area: status-bar;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+  background-color: var(--color-bg-status-bar);
+  border-top: 1px solid var(--color-border-status-bar);
+  position: relative;
+  z-index: var(--z-raised);
+}
+
+.status-bar__section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.status-bar__item {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-status-bar);
+  white-space: nowrap;
+}
+
+/* Theme toggle in status bar */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-0-5) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-status-bar);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--color-bg-interactive);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-subtle);
+}
+
+.theme-toggle-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* ──────────────────────────────────────────
+   RESPONSIVE — narrow viewports
+   At narrow widths, sidebar collapses automatically.
+   ────────────────────────────────────────── */
+
+@media (width <= 48rem) {
+  .workspace {
+    grid-template-columns: 0 1fr;
+  }
+
+  .outline-sidebar {
+    display: none;
+  }
+
+  .editor-canvas {
+    padding: var(--space-8) var(--space-6);
+  }
+
+  .app-header__app-name {
+    display: none;
+  }
+}
+
+/* ──────────────────────────────────────────
+   PRINT
+   Collapse all shell chrome; render document only.
+   ────────────────────────────────────────── */
+
+@media print {
+  .app-header,
+  .toolbar,
+  .outline-sidebar,
+  .status-bar,
+  .skip-link {
+    display: none !important;
+  }
+
+  .app-layout {
+    display: block;
+    height: auto;
+  }
+
+  .workspace {
+    display: block;
+  }
+
+  .editor-main {
+    overflow: visible;
+  }
+
+  .editor-canvas-wrapper {
+    padding: 0;
+    max-width: none;
+  }
+
+  .editor-canvas {
+    box-shadow: none;
+    border-radius: 0;
+    background: #fff;
+    color: #000;
+    padding: var(--page-margin-top) var(--page-margin-right) var(--page-margin-bottom) var(--page-margin-left);
+  }
+}

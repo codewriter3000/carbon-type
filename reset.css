@@ -1,0 +1,177 @@
+/* ============================================================
+   CARBON TYPE — RESET
+   reset.css
+
+   Modern, accessible CSS reset.
+   - Preserves meaningful browser defaults.
+   - Zeroes motion for prefers-reduced-motion.
+   - Sets color-scheme to inform native browser UI.
+   - Applies custom scrollbar styling where supported.
+   ============================================================ */
+
+/* Box model */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Honour reduced-motion preferences — critical for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Root */
+html {
+  /* Inform browser of supported color schemes so native controls match */
+  color-scheme: dark light;
+  font-size: 100%;   /* Respect user's browser font-size preference */
+  line-height: var(--leading-normal);
+  -webkit-text-size-adjust: 100%;
+  tab-size: 2;
+  scroll-behavior: smooth;
+}
+
+/* Body */
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  font-weight: var(--weight-regular);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove default margins from typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+figure,
+dl,
+dd,
+pre {
+  margin: 0;
+}
+
+/* Lists */
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Images and media */
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block;
+  max-width: 100%;
+}
+
+/* Remove default button styles — each component re-applies as needed */
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+}
+
+/* Remove default input styles */
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Remove default link underline — components add back as needed */
+a {
+  color: var(--color-text-link);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-text-link-hover);
+  text-decoration: underline;
+}
+
+/* Ensure interactive elements show focus ring by default */
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* Remove focus ring for mouse / touch users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Table reset */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* Hidden utility — screen-reader-visible, visually hidden */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Custom scrollbars (Chromium / WebKit) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
+}
+
+/* Text selection */
+::selection {
+  background-color: var(--color-bg-selection);
+  color: var(--color-text-primary);
+}

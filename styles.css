@@ -1,0 +1,19 @@
+/* ============================================================
+   CARBON TYPE — STYLESHEET ENTRY
+   styles.css
+
+   Import order matters:
+     1. tokens     — primitives and non-theme tokens
+     2. theme-dark — dark semantic tokens (:root default)
+     3. theme-light — light overrides (media query + explicit)
+     4. reset      — base normalisation (uses semantic tokens)
+     5. typography — type system (uses semantic tokens)
+     6. editor-shell — layout and component styles
+   ============================================================ */
+
+@import "./tokens.css";
+@import "./theme-dark.css";
+@import "./theme-light.css";
+@import "./reset.css";
+@import "./typography.css";
+@import "./editor-shell.css";
