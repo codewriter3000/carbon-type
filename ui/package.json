@@ -1,0 +1,17 @@
+{
+  "name": "monograph-ui-ux",
+  "version": "0.1.0",
+  "private": true,
+  "description": "UI/UX library for Monograph.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "stylelint \"*.css\""
+  },
+  "devDependencies": {
+    "stylelint": "^16.3.1",
+    "stylelint-config-standard": "^36.0.1",
+    "vite": "^5.2.0"
+  }
+}
