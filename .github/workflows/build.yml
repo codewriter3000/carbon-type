@@ -82,7 +82,7 @@ jobs:
           script: |
             const response = await github.rest.actions.createWorkflowDispatch({
               owner: 'codewriter3000',  // Replace with your GitHub username/org
-              repo: 'carbon-type-deployment',  // Replace with your private repo name
+              repo: 'onprem-deployment',  // Replace with your private repo name
               workflow_id: 'deploy.yml',
               ref: 'master',
               inputs: {
